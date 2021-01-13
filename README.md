@@ -1,3 +1,3 @@
 # TB-Budget-SocIns
 Назначение пособий по социальному страхованию
-insurance payment assignment
+insurance payments assignment
