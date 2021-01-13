@@ -1,0 +1,11 @@
+class "";
+
+inclass public
+
+  ИмяВерсииПроекта: String = Self.ClassProject + '.ВерсияПроекта';
+
+  func ПолучитьВерсиюПроекта: Numeric;
+    Result = СИС2.Функции.СформироватьВерсиюПроекта(ClassProject);
+  end;
+
+end
