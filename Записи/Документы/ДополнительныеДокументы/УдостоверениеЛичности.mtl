@@ -1,0 +1,10 @@
+record УдостоверениеЛичности inherited СИС2.Базовая.БазоваяЗапись title "Документ, удостоверяющий личность";
+  field Сотрудник: Базовый.Данные.Субъект title "Сотрудник";
+  field ТипДокумента : integer title "";
+  field Наим : string title "Наименование";
+  field Серия : string title "Серия";
+  field Номер : string title "Номер";
+  field ДатаВыдачи : date title "Дата выдачи";
+  field КемВыдан : string title "Кем выдан";
+  field ДатаОкончания : date title "до какой даты действует";
+end;
