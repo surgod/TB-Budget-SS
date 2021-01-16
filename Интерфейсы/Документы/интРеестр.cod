@@ -1,0 +1,78 @@
+class inherited МашинаРеквизитов.Базовые.интЗапись "Интерфейс записи Бюджет_СоцСтарх.Документы.Реестр";
+
+  inclass public
+
+  func СвязанныйКлассЗаписей: Class СИС2.Базовая.БазоваяЗапись;
+    Result = Документы.Реестр;
+  end;
+
+  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Документы.Реестр): Документы.интРеестр;
+    Result = inherited Create;
+    Result.SetRecord(locRecord);
+  end;
+
+  func БланкРедакторПоУмолчанию: Class BlankForm;
+    Result = nil;
+  end;
+
+  func КартотекаПоУмолчанию: Class CardForm;
+    Result = nil;
+  end;
+
+  func ОписательноеПоле: String;
+    Result = 'ИмяФайла';
+  end;
+
+  var ТекстПриУдалении: String = 'реестр сведений для ФСС';
+  var ТекстПриВосстановлении: String = 'реестр сведений для ФСС';
+  var ТекстИменительный: String = 'реестр сведений для ФСС';
+  var ТекстРодительный: String = 'реестра сведений для ФСС';
+  var ТекстПриГрупповойОперации: String = 'реестры сведений для ФСС';
+
+  inobject public
+
+  var Record: Документы.Реестр;
+
+  var НашеУчреждение: Базовый.Данные.Субъект;
+  var Подразделение: Базовый.Данные.Субъект;
+  var РегНомер: string;
+  var НомерЗаДень: integer;
+  var Дата: date;
+
+
+  --@doc Возвращает значение простого поля Нашего учреждения
+  func ПолучитьПолеНашегоУчреждения(locFieldName: string): variant;
+    Result = НашеУчреждение.Evaluate(locFieldName);
+  end;
+
+  --@doc Возвращает значение простого поля Подразделения (обособленного)
+  func ПолучитьПолеПодразделения(locFieldName: string): variant;
+    Result = Подразделение.Evaluate(locFieldName);
+  end;
+
+  inobject private
+
+  proc Инициализировать synonym Init;
+    Assert(Record.State = Kernel.Record.Created);
+  end;
+
+  proc ИнициализироватьПоУмолчанию synonym InitByDefault;
+    Init;
+  end;
+
+  --@doc Эта процедура наследует МР; На нее завязано изменение поля Record во всех методах интерфейса;
+  proc УстановитьЗапись synonym SetRecord (locRecord: Документы.Реестр);
+    Record = locRecord;
+    if (locRecord <> nil):
+      НашеУчреждение = locRecord.НашеУчреждение;
+      Подразделение = locRecord.Подразделение;
+    fi;
+  end;
+
+  proc ВыполнитьУдаление synonym DoDelete (const aCheckRefs: Logical);
+    if СИС2.ФункцииДокумента.Валидный(Record):
+      inherited DoDelete(aCheckRefs);
+    fi;
+  end;
+
+end
