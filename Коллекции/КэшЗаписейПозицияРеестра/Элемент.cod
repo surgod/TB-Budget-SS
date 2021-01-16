@@ -1,0 +1,64 @@
+class inherited ТББ_Базовый.Коллекция.ЭлементКонтейнера "";
+import СИС2 classes ФункцииДокумента;
+
+InClass Public
+
+  func СоздатьПоЗаписи (locRecord: Документы.ПозицияРеестра): КэшЗаписейПозицияРеестра.Элемент;
+    Result = inherited Create;
+    Result._Record = locRecord;
+    Result._RecordId = locRecord.DocId;
+    Result._Реестр = locRecord.Реестр;
+    Result._Сведения = locRecord.Сведения;
+    Result._НомерСтроки = locRecord.НомерСтроки;
+  end;
+
+  func СоздатьНовый (locCnt: КэшЗаписейПозицияРеестра.Контейнер): КэшЗаписейПозицияРеестра.Элемент;
+    var newRecord: Документы.ПозицияРеестра;
+    Result = inherited Create;
+    newRecord = Документы.ПозицияРеестра.Create;
+    newRecord.Реестр = locCnt.Реестр;
+    Result._Record = newRecord.Create;
+    Result._RecordId = newRecord.DocId;
+    Result._Реестр = locCnt.Реестр;
+    --Result._НомерСтроки =
+    #warning "здесь сформировать номер строки реестра";
+  end;
+
+inobject public
+
+  func Сведения: Документы.Заявление; Return _Сведения; end;
+  func Реестр: Документы.Реестр; Return _Реестр; end;
+  func НомерСтроки: string; Return _НомерСтроки; end;
+
+  proc УстСведения (locValue: Документы.Заявление); _Сведения = locValue; end;
+  proc УстНомерСтроки (locValue: string); _НомерСтроки = locValue; end;
+
+  func НетЗначимыхДанных: logical;
+      Result = (_Сведения = nil) and (_НомерСтроки = nil);
+  end;
+
+  proc СохранитьЗапись (locCnt: КэшЗаписейПозицияРеестра.Контейнер);
+    if (_Реестр <> nil) and not(НетЗначимыхДанных):
+      _Record.Реестр = _Реестр;
+      _Record.Сведения = _Сведения;
+      _Record.НомерСтроки = _НомерСтроки;
+      RecordPostIfNeed(_Record);
+    fi;
+  end;
+
+inobject public
+
+  proc УдалитьЗапись;
+    RecordDeleteEx(_Record, false);
+  end;
+
+
+inobject private
+
+  _RecordId: Integer;
+  _Record: Документы.ПозицияРеестра;
+  _Реестр: Документы.Реестр;
+  _Сведения: Документы.Заявление;
+  _НомерСтроки: string;
+
+end

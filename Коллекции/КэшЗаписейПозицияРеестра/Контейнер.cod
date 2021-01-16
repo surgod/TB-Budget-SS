@@ -1,0 +1,66 @@
+class inherited “ЅЅ_Ѕазовый. оллекци€. онтейнерЁлементов "";
+
+inclass public
+
+  func —оздатьƒл€–еестра (var locRecord: ƒокументы.–еестр):  эш«аписейѕозици€–еестра. онтейнер;
+    Result = inherited CreateAs( эш«аписейѕозици€–еестра.Ёлемент, ['_RecordId']);
+    Result._–еестр = locRecord;
+    Result._ƒанные»зменены = false;
+    if (locRecord <> nil):
+      with Query.Create([ƒокументы.ѕозици€–еестра]) do
+        Filter = '–еестр=' + Str(locRecord);
+        if RecordsExists:
+          Select;
+          while not Eof do
+            Result.Add( эш«аписейѕозици€–еестра.Ёлемент.—оздатьѕо«аписи(Current));
+            Next;
+          od;
+        else
+          Result.Add( эш«аписейѕозици€–еестра.Ёлемент.—оздатьЌовый(Result));
+        fi;
+      end;
+    fi;
+  end;
+
+InObject Public
+
+  func –еестр: ƒокументы.–еестр;
+    Return _–еестр;
+  end;
+
+  --@doc —охранение данных в Ѕƒ
+  proc —охранитьƒанные;
+    var i, ii: integer;
+    ii = Count;
+    for i = 1 .. ii do
+      data[i].—охранить«апись(self);
+    od;
+    if (_Ёлементыƒл€”далени€ <> nil):
+      ii = _Ёлементыƒл€”далени€.Count;
+      for i = 1 .. ii do
+        _Ёлементыƒл€”далени€.data[i].”далить«апись;
+      od;
+    fi;
+  end;
+
+InObject Private
+
+  func Ёлементыƒл€”далени€:  эш«аписейѕозици€–еестра. онтейнер;
+    Return _Ёлементыƒл€”далени€;
+  end;
+
+  func ƒанные»зменены: logical; Return _ƒанные»зменены; end;
+
+  proc ”стƒанные»зменены;
+    if (_ƒанные»зменены = false):
+      _ƒанные»зменены = true;
+    fi;
+  end;
+
+  var data:  эш«аписейѕозици€–еестра.Ёлемент[];
+  var _–еестр: ƒокументы.–еестр;
+
+  var _Ёлементыƒл€”далени€:  эш«аписейѕозици€–еестра. онтейнер;
+  var _ƒанные»зменены: logical;
+
+end
