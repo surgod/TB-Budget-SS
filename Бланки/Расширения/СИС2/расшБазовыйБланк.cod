@@ -1,0 +1,43 @@
+extends —»—2.ЅазовыйЅланк "–асширение базового бланка";
+
+
+  inobject private
+
+--{ ¬спомогательные методы
+
+--@doc ќпредел€ютс€ номера строк лок—екц по именам
+--@doc имена строк в массиве лок»мена—трок
+func Ќомера—трокѕо»менам(лок—екц : TemplateSection; лок»мена—трок[] : string) : integer[];
+  var i,nn,ii : integer;
+  var locRow : TemplateRow;
+    Result = nil;
+    nn = LengthOfArray(лок»мена—трок);
+    for i = 1..nn do
+      locRow = —трока—екцииѕо»мени(лок—екц,лок»мена—трок[i]);
+      ii = if (locRow <> nil : locRow.Number, 0);
+      Result[i] = ii;
+    end;
+end;
+
+--@doc ќпредел€ютс€ номера столбцов лок—екц по именам
+--@doc имена столбцов в массиве лок»мена—олбцов
+func Ќомера—толбцовѕо»менам(лок—екц : TemplateSection; лок»мена—олбцов[] : string) : integer[];
+  var i,nn,ii : integer;
+  var locCol : TemplateColumn;
+    Result = nil;
+    nn = LengthOfArray(лок»мена—олбцов);
+    for i = 1..nn do
+      locCol = —толбец—екцииѕо»мени(лок—екц,лок»мена—олбцов[i]);
+      ii = if (locCol <> nil : locCol.Number, 0);
+      Result[i] = ii;
+    end;
+end;
+
+
+
+--}
+
+
+
+
+end
