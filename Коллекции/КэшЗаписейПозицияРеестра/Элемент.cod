@@ -26,11 +26,11 @@ InClass Public
 
 inobject public
 
-  func Сведения: Документы.Заявление; Return _Сведения; end;
+  func Сведения: Документы.Первичные.Заявление; Return _Сведения; end;
   func Реестр: Документы.Реестр; Return _Реестр; end;
   func НомерСтроки: string; Return _НомерСтроки; end;
 
-  proc УстСведения (locValue: Документы.Заявление); _Сведения = locValue; end;
+  proc УстСведения (locValue: Документы.Первичные.Заявление); _Сведения = locValue; end;
   proc УстНомерСтроки (locValue: string); _НомерСтроки = locValue; end;
 
   func НетЗначимыхДанных: logical;
@@ -58,7 +58,7 @@ inobject private
   _RecordId: Integer;
   _Record: Документы.ПозицияРеестра;
   _Реестр: Документы.Реестр;
-  _Сведения: Документы.Заявление;
+  _Сведения: Документы.Первичные.Заявление;
   _НомерСтроки: string;
 
 end
