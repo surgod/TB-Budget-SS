@@ -66,8 +66,15 @@ func  вартира : string;
   return _ вартира;
 end;
 
+proc «аполнитьѕо”молчанию;
 
+end;
 
+proc ”далить«аписьјдреса;
+  if (_јдрес <> nil) :
+    _јдрес.Delete;
+  fi;
+end;
 
 inobject private
 
