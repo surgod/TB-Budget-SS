@@ -117,6 +117,31 @@ func ПолеРежим_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Log
 
 end;
 
+func ПолеПолучателя_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
+  Result = '';
+  if (Cell.Contents = 'ОсновныеСведенияСтрокой') :
+    return Получатель.ОсновныеСведенияСтрокой;
+  elsif (Cell.Contents = 'УдостоверениеСтрокой') :
+    return Получатель.Удостоверение.УдостоверениеСтрокой;
+  elsif (Cell.Contents = 'ДокументОПроживанииСтрокой') :
+    --return Получатель.Удостоверение.УдостоверениеСтрокой;
+    return '';
+  elsif (Cell.Contents = 'АдресРегистрацииСтрокой') :
+    return Получатель.АдресРегистрации.АдресСтрокой;
+  elsif (Cell.Contents = 'АдресПроживанияСтрокой') :
+    return Получатель.АдресПроживания.АдресСтрокой;
+  fi;
+end;
+
+func Поле_ПриВходе_Получатель (Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+  Result = false;
+  if (Cell.Contents = 'ОсновныеСведенияСтрокой'):
+
+  fi;
+end;
+
+
+
 --}
 
 
@@ -314,6 +339,9 @@ func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Acti
     Return МассивСтрокВТекст(aTxt);
   end;
 end;
+
+
+
 
 
 
