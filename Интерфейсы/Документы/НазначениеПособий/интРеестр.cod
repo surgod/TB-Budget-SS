@@ -6,7 +6,7 @@ class inherited МашинаРеквизитов.Базовые.интЗапись "Интерфейс записи Бюджет_СоцС
     Result = Документы.НазначениеПособий.Реестр;
   end;
 
-  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Документы.НазначениеПособий.Реестр): Документы.интРеестр;
+  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Документы.НазначениеПособий.Реестр): Документы.НазначениеПособий.интРеестр;
     Result = inherited Create;
     Result.SetRecord(locRecord);
   end;

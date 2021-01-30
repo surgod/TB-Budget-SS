@@ -1,0 +1,8 @@
+record БанкРеквизиты inherited МашинаРеквизитов.Базовые.БазоваяКодИмя title "Банковские реквизиты";
+  field Субъект: Базовый.Данные.Субъект title "Сотрудник";
+  field Завершено: logical;
+  field БанкНаим : string title "Наименование банка";
+  field СчетПолучателя : string title "Номер счета получателя";
+  field БИК : string title "БИК";
+  field НомерКарты : string title "Номер карты";
+end;

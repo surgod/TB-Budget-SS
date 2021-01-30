@@ -39,7 +39,7 @@ var секц–еквизиты : TemplateSection;
 
 proc шаблон_ѕри—оздании(Context :Variant);
   inherited шаблон_ѕри—оздании(Context);
-  ќбновить—писокѕол€(Template.CellByField['“ип–еестра'], “ипы–еестров);
+  ќбновить—писокѕол€(Template.CellByField['“ип–еестра'], “ипы–еестровЌазначѕос);
 end;
 
 proc шаблон_ѕриќткрытии(Create :Logical);
@@ -139,7 +139,7 @@ func ¬се¬ведено : logical;
   if (—убъект = nil) :
     return false;
   fi;
-  if (“ип–еестра = “ип–еестраЌет) :
+  if (“ип–еестра = “ип–еестраЌѕ_Ќет) :
     return false;
   fi;
   --дату вводить не об€зательно

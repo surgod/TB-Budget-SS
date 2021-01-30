@@ -1,0 +1,9 @@
+record Справка  inherited СИС2.Базовая.БазоваяЗапись title "Документ, необходимый для назначения пособия";
+  field СтраховойСлучай : Данные.НазначениеПособий.СтраховойСлучай title "Страховой случай";
+  field Завершено: logical;
+  field ТипСправки: integer;
+  field Наим : string title "Наименование";
+  field Серия : string title "Серия";
+  field Номер : string title "Номер";
+  field ДатаВыдачи : date title "Дата выдачи";
+end;
