@@ -1,50 +1,42 @@
 ﻿[Options]
 Version=7
-Query=Бюджет_СоцСтрах.Данные.НазначениеПособий.СтраховойСлучай
-CanEdit=0
-CanInplace=1
-ColumnCount=5
-Column:0=Код
-Column:1=Имя
-Column:2=НашеУчреждение.Имя
-Column:3=Субъект.Имя
-Column:4=ДатаСтраховогоСлучая
-TreeWidth=120
-SubTableWidth=100
-SubTableHeight=100
+Query=.Данные.НазначениеПособий.СтраховойСлучай
+MBlank=.Данные.НазначениеПособий.редСтраховойСлучай
+OnMove=картотека_ПриПеремещении
+OnOpenBlank=картотека_ПриОткрытииБланка
+OnCreateRecord=картотека_ПриСозданииЗаписи
+OnEdit=Картотека_ПриРедактировании
+OnPost=Картотека_ПриЗаписи
+OnCancel=картотека_ПриОтмене
+OnBeforeModify=картотека_ПередИзменением
+OnModify=картотека_ПриИзменении
+OnClick=картотека_ПриНажатии
+OnRearrange=картотека_ПриОформлении
+ColumnCount=4
+Column:0=НашеУчреждение
+Column:1=Субъект
+Column:2=ДатаСтраховогоСлучая
+Column:3=ТипПособия
+TreeWidth=1
+SubTableWidth=0
+SubTableHeight=0
+SubTableAlign=0
 
-[.Column.Код]
-Caption=Код
-Hint=Код
-Width=200
-ColumnFormat=1
+[.Column.НашеУчреждение]
+Caption=Наше учреждение
+Width=100
+Alignment=2
 
-[.Column.Имя]
-Caption=Имя
-Hint=Наименование
-Width=200
-ColumnFormat=1
-
-[.Column.НашеУчреждение.Имя]
-Caption=НашеУчреждение
-Hint=Наше учреждение
-Width=200
-Lookup=1
-ColumnFormat=6
-ManualEdit=1
-
-[.Column.Субъект.Имя]
+[.Column.Субъект]
 Caption=Субъект
-Hint=Сотрудник
-Width=200
-Lookup=1
-ColumnFormat=6
-ManualEdit=1
+Width=100
+Alignment=2
 
 [.Column.ДатаСтраховогоСлучая]
-Caption=ДатаСтраховогоСлучая
-Hint=Дата наступления страхового случая
-Width=110
-Alignment=2
-ColumnFormat=3
-DateInpFmt=2
+Caption=Дата наступления страхового случая
+Width=100
+
+[.Column.ТипПособия]
+Caption=ТипПособия
+Width=100
+Alignment=1

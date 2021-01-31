@@ -1,5 +1,6 @@
 Class inherited МашинаРеквизитов.Базовые.блРедакторСИнтерфейсом "Редактор страхового случая" , editor Данные.НазначениеПособий.СтраховойСлучай;
 
+import classes Константы,ФункцииПримененияКостант;
 
 --{{ Свойства
 
@@ -8,15 +9,38 @@ inobject public
   var Интерфейс: Данные.НазначениеПособий.интСтраховойСлучай;
 
 
---}}
+inobject private
 
---{{ Конструкторы, визуализаторы
+--фреймы
+
+var фреймРеквизитыФормы : TemplateFrame;
+var фрейсСоставФормы : TemplateFrame;
+var фреймПолучатель : TemplateFrame;
+var фреймПособие : TemplateFrame;
+var фреймБанк : TemplateFrame;
+var фреймДопСервис : TemplateFrame;
+
 --}}
 
 --{{ Обработчики событий шаблона
+proc шаблон_ПриСчитывании;
+  inherited шаблон_ПриСчитывании;
+  ВидФормы;
+end;
+
 --}}
 
 --{{ Обработчики событий клеток шаблона
+
+func ПолеСтрахСлучай_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
+  Result = '';
+  if (Cell.Contents = 'ИмяСтрахСлучая') :
+    return ИмяСтраховогоСлучая(ТипПособия);
+  fi;
+end;
+
+
+
 --}}
 
 --{{ Обработчики событий прочих объектов шаблона
@@ -26,6 +50,55 @@ inobject public
 --}}
 
 --{{ Вспомогательные методы
+
+proc ВидФормы;
+  Template.BeginModify;
+    СекциинаЭкран;
+  Template.EndModify;
+end;
+
+proc СекциинаЭкран;
+  var локСекц : TemplateSection;
+  var nstr[],i,j : integer;
+    локСекц = СекцияПоИмени('секцСтрахСлучай',фреймРеквизитыФормы);
+    nstr = НомераСтрокПоИменам(локСекц,['стрСтрСлуч_С_По','стрСтрСлуч_Справ','стрСтрСлуч_Рожд']);
+    if (0 in nstr) :
+      return;
+    fi;
+    for i = 1..LengthOfArray(nstr) do
+      j = nstr[i];
+      локСекц.Row[j].Visible = false;
+    od;
+    if (ТипПособия = ТипПособияБЛ) :
+      j = 1;
+    elsif (ТипПособия = ТипПособияБерем) :
+      j = 1;
+    elsif (ТипПособия = ТипПособияРанСрок) :
+      j = 2;
+    elsif (ТипПособия = ТипПособияРожд) :
+      j = 3;
+    elsif (ТипПособия = ТипПособияУходРеб) :
+      j = 1;
+    fi;
+    локСекц.Row[j].Visible = true;
+end;
+
+
+
+
+
 --}}
+
+
+func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+  var aTxt: string[];
+  with СИС2.СтроковыеФункции  do
+    aTxt[1] = MarkInGray(НашеУчреждение.Наим);
+    aTxt[2] = 'Пособие ' + ИмяТипаПособия(ТипПособия) + ',страховой случай  '+ Код ;
+    aTxt[3] = MarkInGray(Субъект.Имя);
+    Return МассивСтрокВТекст(aTxt);
+  end;
+end;
+
 
 end
