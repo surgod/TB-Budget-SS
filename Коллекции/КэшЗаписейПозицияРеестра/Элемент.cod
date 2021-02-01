@@ -3,7 +3,7 @@ import СИС2 classes ФункцииДокумента;
 
 InClass Public
 
-  func СоздатьПоЗаписи (locRecord: Документы.НазначениеПособий.ПозицияРеестра): КэшЗаписейПозицияРеестра.Элемент;
+  func СоздатьПоЗаписи (locRecord: Документы.ФСС.ПозицияРеестра): КэшЗаписейПозицияРеестра.Элемент;
     Result = inherited Create;
     Result._Record = locRecord;
     Result._RecordId = locRecord.DocId;
@@ -13,9 +13,9 @@ InClass Public
   end;
 
   func СоздатьНовый (locCnt: КэшЗаписейПозицияРеестра.Контейнер): КэшЗаписейПозицияРеестра.Элемент;
-    var newRecord: Документы.НазначениеПособий.ПозицияРеестра;
+    var newRecord: Документы.ФСС.ПозицияРеестра;
     Result = inherited Create;
-    newRecord = Документы.НазначениеПособий.ПозицияРеестра.Create;
+    newRecord = Документы.ФСС.ПозицияРеестра.Create;
     newRecord.Реестр = locCnt.Реестр;
     Result._Record = newRecord.Create;
     Result._RecordId = newRecord.DocId;
@@ -26,11 +26,11 @@ InClass Public
 
 inobject public
 
-  func Сведения: Данные.НазначениеПособий.ЗаявкаНаНазначениеПособия; Return _Сведения; end;
-  func Реестр: Документы.НазначениеПособий.Реестр; Return _Реестр; end;
+  func Сведения: Данные.ЗаявкаНаНазначениеПособия; Return _Сведения; end;
+  func Реестр: Документы.ФСС.Реестр; Return _Реестр; end;
   func НомерСтроки: string; Return _НомерСтроки; end;
 
-  proc УстСведения (locValue: Данные.НазначениеПособий.ЗаявкаНаНазначениеПособия); _Сведения = locValue; end;
+  proc УстСведения (locValue: Данные.ЗаявкаНаНазначениеПособия); _Сведения = locValue; end;
   proc УстНомерСтроки (locValue: string); _НомерСтроки = locValue; end;
 
   func НетЗначимыхДанных: logical;
@@ -56,9 +56,9 @@ inobject public
 inobject private
 
   _RecordId: Integer;
-  _Record: Документы.НазначениеПособий.ПозицияРеестра;
-  _Реестр: Документы.НазначениеПособий.Реестр;
-  _Сведения: Данные.НазначениеПособий.ЗаявкаНаНазначениеПособия;
+  _Record: Документы.ФСС.ПозицияРеестра;
+  _Реестр: Документы.ФСС.Реестр;
+  _Сведения: Данные.ЗаявкаНаНазначениеПособия;
   _НомерСтроки: string;
 
 end
