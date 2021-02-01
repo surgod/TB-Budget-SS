@@ -17,11 +17,11 @@ inclass public
   end;
 
   func БланкРедакторПоУмолчанию: class BlankForm;
-    Result = Данные.НазначениеПособий.редСтраховойСлучай;
+    Result = Данные.редСтраховойСлучай;
   end;
 
   func КартотекаПоУмолчанию: class CardForm;
-    Result = Данные.НазначениеПособий.картСтраховойСлучай;
+    Result = Данные.картСтраховойСлучай;
   end;
 
 inobject public
