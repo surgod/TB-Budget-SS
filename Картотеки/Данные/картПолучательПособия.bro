@@ -1,7 +1,8 @@
 ﻿[Options]
 Version=7
-Query=.Данные.СтраховойСлучай
-MBlank=.Данные.редСтраховойСлучай
+Query=.Данные.ПолучательПособия
+MBlank=.Данные.редПолучательПособия
+CanHGroupModify=0
 OnMove=картотека_ПриПеремещении
 OnOpenBlank=картотека_ПриОткрытииБланка
 OnCreateRecord=картотека_ПриСозданииЗаписи
@@ -12,15 +13,15 @@ OnBeforeModify=картотека_ПередИзменением
 OnModify=картотека_ПриИзменении
 OnClick=картотека_ПриНажатии
 OnRearrange=картотека_ПриОформлении
-ColumnCount=4
+ColumnCount=3
 Column:0=НашеУчреждение.Имя
 Column:1=Субъект.Имя
-Column:2=ДатаСтраховогоСлучая
-Column:3=ТипПособия
+Column:2=СтраховойСлучай.Имя
 TreeWidth=1
 SubTableWidth=0
 SubTableHeight=0
 SubTableAlign=0
+TemplateWidth=157
 
 [.Column.НашеУчреждение.Имя]
 Caption=Наименование
@@ -30,11 +31,6 @@ Width=100
 Caption=Наименование
 Width=100
 
-[.Column.ДатаСтраховогоСлучая]
-Caption=Дата наступления страхового случая
+[.Column.СтраховойСлучай.Имя]
+Caption=Наименование
 Width=100
-
-[.Column.ТипПособия]
-Caption=ТипПособия
-Width=100
-Alignment=1

@@ -1,46 +1,41 @@
-class inherited МашинаРеквизитов.Базовые.интЗаписьКодИмя "Интерфейс записи СтраховойСлучай";
+class inherited МашинаРеквизитов.Базовые.интЗаписьКодИмя "Интерфейс записи ПолучательПособия";
 
 inclass public
 
   func СвязанныйКлассЗаписей: class СИС2.Базовая.БазоваяЗапись;
-    Result = Данные.СтраховойСлучай;
+    Result = Данные.ПолучательПособия;
   end;
 
-  func Create: Данные.интСтраховойСлучай;
+  func Create: Данные.интПолучательПособия;
     Result = inherited Create;
-    Result.Record = Данные.СтраховойСлучай.Create;
+    Result.Record = Данные.ПолучательПособия.Create;
   end;
 
-  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Данные.СтраховойСлучай): Данные.интСтраховойСлучай;
+  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Данные.ПолучательПособия): Данные.интПолучательПособия;
     Result = inherited Create;
     Result.Record = locRecord;
   end;
 
   func БланкРедакторПоУмолчанию: class BlankForm;
-    Result = Данные.редСтраховойСлучай;
+    Result = Данные.редПолучательПособия;
   end;
 
   func КартотекаПоУмолчанию: class CardForm;
-    Result = Данные.картСтраховойСлучай;
+    Result = Данные.картПолучательПособия;
   end;
-
 
   ------------
 
-  func СоздатьСДопПараметрами (локДопПараметры[2] : variant): Данные.интСтраховойСлучай;
+  func СоздатьСДопПараметрами (локДопПараметры[2] : variant): Данные.интПолучательПособия;
     Result = inherited Create;
     Result.ДопПараметры = локДопПараметры;
-    Result.Record = Данные.СтраховойСлучай.Create;
+    Result.Record = Данные.ПолучательПособия.Create;
   end;
-
 
 
 inobject public
 
-  Record: Данные.СтраховойСлучай;
-
-
-
+  Record: Данные.ПолучательПособия;
 
 
   var ДопПараметры[2] : variant;
@@ -56,8 +51,6 @@ proc ИнициализироватьПоУмолчанию synonym InitByDefault;
   inherited InitByDefault;
   Self.Record.Код = ТББ_Базовый.Нумератор.НовыйКод(Self.Record);
 end;
-
-
 
 
 end
