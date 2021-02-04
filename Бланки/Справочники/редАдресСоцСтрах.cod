@@ -1,4 +1,4 @@
-class inherited АдресК.Справочники.редАдрес "Редактор адреса получателя пособия", editor Справочники.АдресСоцСтрах;
+class inherited АдресК.Справочники.редАдрес "Редактор адреса получателя пособия", editor Базовый.Справочники.Адрес;
 
 
 inobject private
@@ -7,8 +7,46 @@ inobject private
 --{ Обработчики событий бланка
 proc шаблон_ПриСоздании(Context :Variant);
   inherited шаблон_ПриСоздании(Context);
-  секцСубъект.КлеткаПоПолю["Субъект.Имя"].Enabled  = true;
+  Template.BeginModify;
+    секцСубъект.КлеткаПоПолю["Субъект.Имя"].Enabled  = true;
+    секцСубъект.КлеткаПоПолю["Субъект.Имя"].OnOutput  = 'ПолеСубъект_ПриВыводе';
+  Template.EndModify;
 end;
+
+func ПолеСубъект_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
+  Result = '';
+  if (Cell.Contents = 'Субъект') :
+    return ПолучательПособия.Имя;
+  --elsif (Cell.Contents = 'Субъект') :
+  --  return ПолучательПособия.Код;
+  fi;
+end;
+
+  proc ПоказатьТипыАдресов;
+    ТипАдресаНаим = nil;
+    with Query.Create([Базовый.Справочники.ТипАдреса]) do
+      Order = 'Номер';
+      --if Субъект.ФизическоеЛицо or Субъект.Сотрудник then
+        Filter = 'ДляФизлиц';
+      --elsif Субъект.Контрагент and Субъект.ТипКонтрагента = 0 then
+      --  Filter = 'ДляКонтрагентов';
+      --fi;
+      Select;
+      while not Eof do
+        СИС2.Функции.AddInArray(ТипАдресаНаим, Current, true);
+        Next;
+      end;
+      секПозицииТиповАдресов.Count = Count;
+    end;
+  end;
+
+
+
+
+
+
+
+
 --}
 
 

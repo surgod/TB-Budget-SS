@@ -1,0 +1,80 @@
+class inherited СИС2.БазовыйБланк "";
+
+
+inclass public
+
+func CreateExt (локПолучательПособия : ЭлементыДанных.ПолучательПособия): Данные.блПолучатель;
+  Result = Данные.блПолучатель.Create;
+  Result.ПолучательПособия = локПолучательПособия;
+end;
+
+func OpenForm (локПолучательПособия : ЭлементыДанных.ПолучательПособия): integer;
+  var locForm: Данные.блПолучатель;
+  locForm = CreateExt (локПолучательПособия);
+  if (CmOk = locForm.ShowEx( , Kernel.Window.ModalWindow)):
+    Return CmOk;
+  fi;
+end;
+
+inobject  private
+
+var ПолучательПособия : ЭлементыДанных.ПолучательПособия;
+var Тест : string;
+var ДатаП : date;
+
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+
+func ПолеПолучатель_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): variant;
+  var локсекц : TemplateSection;
+  var locRow,locCol : integer;
+    локсекц = Cell.Owner;
+    locRow = Cell.Row;
+    locCol = Cell.Column -1;
+  Result = '';
+  if (локсекц.Cell[locCol,locRow].Contents = 'Фамилия') :
+    return ПолучательПособия.ФамилияПолучателя;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'Имя') :
+    return ПолучательПособия.ИмяПолучателя;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'Отчество') :
+    return ПолучательПособия.ОтчествоПолучателя;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'Телефон') :
+    return ПолучательПособия.Телефон;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'ДатаРождения') :
+    return ПолучательПособия.ДатаРождения;
+  fi;
+end;
+
+
+func ПолеПолучатель_ПриВходе (Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+    return true;
+end;
+
+func ПолеПолучатель_ПриВводе(Cell :TemplateCell; Value : variant) :Logical;
+  var локсекц : TemplateSection;
+  var locRow,locCol : integer;
+    локсекц = Cell.Owner;
+    locRow = Cell.Row;
+    locCol = Cell.Column -1;
+    Result = false;
+  if (локсекц.Cell[locCol,locRow].Contents = 'Фамилия') :
+    ПолучательПособия.ЗапомнитьФамилияПолучателя(value);
+    return true;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'Имя') :
+    ПолучательПособия.ЗапомнитьИмяПолучателя(value);
+    return true;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'Отчество') :
+    ПолучательПособия.ЗапомнитьОтчествоПолучателя(value);
+    return true;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'Телефон') :
+    ПолучательПособия.ЗапомнитьТелефон(value);
+    return true;
+  elsif (локсекц.Cell[locCol,locRow].Contents = 'ДатаРождения') :
+    ПолучательПособия.ЗапомнитьДатаРождения(value);
+    return true;
+  fi;
+end;
+
+--}
+
+end

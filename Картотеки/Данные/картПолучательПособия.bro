@@ -13,10 +13,12 @@ OnBeforeModify=картотека_ПередИзменением
 OnModify=картотека_ПриИзменении
 OnClick=картотека_ПриНажатии
 OnRearrange=картотека_ПриОформлении
-ColumnCount=3
+ColumnCount=5
 Column:0=НашеУчреждение.Имя
 Column:1=Субъект.Имя
 Column:2=СтраховойСлучай.Имя
+Column:3=Имя
+Column:4=Наим
 TreeWidth=1
 SubTableWidth=0
 SubTableHeight=0
@@ -32,5 +34,13 @@ Caption=Наименование
 Width=100
 
 [.Column.СтраховойСлучай.Имя]
+Caption=Наименование
+Width=100
+
+[.Column.Имя]
+Caption=Наименование
+Width=100
+
+[.Column.Наим]
 Caption=Наименование
 Width=100
