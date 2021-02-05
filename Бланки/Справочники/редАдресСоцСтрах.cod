@@ -5,22 +5,27 @@ inobject private
 
 --------------------------------------------------------------------------------
 --{ Обработчики событий бланка
-proc шаблон_ПриСоздании(Context :Variant);
-  inherited шаблон_ПриСоздании(Context);
+
+
+proc шаблон_ПриОткрытии(Create :Logical);
+  var Cell1,Cell2 : TemplateCell;
+  var locRow,locCol : integer;
   Template.BeginModify;
-    секцСубъект.КлеткаПоПолю["Субъект.Имя"].Enabled  = true;
-    секцСубъект.КлеткаПоПолю["Субъект.Имя"].OnOutput  = 'ПолеСубъект_ПриВыводе';
+    Cell1 = секцСубъект.КлеткаПоПолю["Субъект.Имя"];
+    Cell1.CellType = Template.StaticCell;
+    Cell1.Contents = ПолучательПособия.Имя;
+    Cell2 = секцСубъект.КлеткаПоПолю["Субъект.Код"];
+    Cell2.CellType = Template.StaticCell;
+    Cell2.Contents = ПолучательПособия.Код;
+    Cell1.Style = Cell2.Style;
+    locRow = Cell1.Row;
+    locCol = Cell1.Column;
+    секцСубъект.Cell[locCol,locRow + 1].Contents = 'Имя получателя пособия';
   Template.EndModify;
+  inherited шаблон_ПриОткрытии(Create);
 end;
 
-func ПолеСубъект_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
-  Result = '';
-  if (Cell.Contents = 'Субъект') :
-    return ПолучательПособия.Имя;
-  --elsif (Cell.Contents = 'Субъект') :
-  --  return ПолучательПособия.Код;
-  fi;
-end;
+
 
   proc ПоказатьТипыАдресов;
     ТипАдресаНаим = nil;
@@ -40,6 +45,8 @@ end;
     end;
   end;
 
+  proc УстановитьФильтрСубъекта;
+  end;
 
 
 

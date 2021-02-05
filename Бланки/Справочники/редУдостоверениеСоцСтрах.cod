@@ -1,0 +1,30 @@
+class inherited ТББ_Базовый.Справочники.редУдостоверение "", editor Базовый.Справочники.Удостоверение;
+
+inobject private
+
+var фреймШапка : TemplateFrame;
+
+
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+
+
+proc шаблон_ПриОткрытии(Create :Logical);
+  var Cell1,Cell2 : TemplateCell;
+  var locRow,locCol : integer;
+  Template.BeginModify;
+    Cell1 = фреймШапка.КлеткаПоПолю["ФизЛицо"];
+    Cell1.CellType = Template.StaticCell;
+    Cell1.Contents = ПолучательПособия.Имя;
+    Cell2 = фреймШапка.КлеткаПоПолю["ФизЛицо.Код"];
+    Cell2.CellType = Template.StaticCell;
+    Cell2.Contents = ПолучательПособия.Код;
+    Cell1.Style = Cell2.Style;
+    locRow = Cell2.Row;
+    locCol = Cell2.Column;
+    Cell2.Owner.Cell[locCol,locRow + 1].Contents = 'Код';
+  Template.EndModify;
+  inherited шаблон_ПриОткрытии(Create);
+end;
+
+end

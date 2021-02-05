@@ -20,7 +20,7 @@ inobject private
 proc кнјдрес–ег_ѕриЌажатии (Sender: Button);
  var локјдрес : —правочники.јдрес—оц—трах;
  var locForm: —правочники.редјдрес—оц—трах;
-   локјдрес = јдрес——ѕолучател€ѕо“ипу(Self.Record,тапѕрописка);
+   --локјдрес = јдрес——ѕолучател€ѕо“ипу(Self.Record,тапѕрописка);
    locForm = —правочники.редјдрес—оц—трах.Create;
    locForm.ShowEx(локјдрес , Kernel.Window.ModalWindow);
 end;
@@ -28,7 +28,7 @@ end;
 proc кнјдресѕрож_ѕриЌажатии (Sender: Button);
  var локјдрес : —правочники.јдрес—оц—трах;
  var locForm: —правочники.редјдрес—оц—трах;
-   локјдрес = јдрес——ѕолучател€ѕо“ипу(Self.Record,тап‘актический);
+   --локјдрес = јдрес——ѕолучател€ѕо“ипу(Self.Record,тап‘актический);
    locForm = —правочники.редјдрес—оц—трах.Create;
    locForm.ShowEx(локјдрес , Kernel.Window.ModalWindow);
 end;

@@ -1,4 +1,4 @@
-Class inherited МашинаРеквизитов.Базовые.блРедакторСИнтерфейсом "Редактор страхового случая" , editor Данные.СтраховойСлучай;
+class inherited МашинаРеквизитов.Базовые.блРедакторСИнтерфейсом "", editor Данные.СтраховойСлучай;
 
 import classes Константы,ФункцииПримененияКостант,ФункцииЭлементовДанных;
 import Базовый classes Константы;
@@ -14,154 +14,16 @@ inobject private
 
 --фреймы
 
-var фреймРеквизитыФормы : TemplateFrame;
-var фрейсСоставФормы : TemplateFrame;
-var фреймПолучатель : TemplateFrame;
-var фреймПособие : TemplateFrame;
-var фреймБанк : TemplateFrame;
-var фреймДопСервис : TemplateFrame;
-var фреймШаблон : TemplateFrame;
+
 
 var ПолучательПособия : ЭлементыДанных.ПолучательПособия;
 
 
-var Тест : string;
-var ДатаП : date;
 --}}
 
---{{ Обработчики событий шаблона
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
 
-proc шаблон_ПриОткрытии (Create: Logical);
-  inherited шаблон_ПриОткрытии(Create);
-  --ВидФормы;
-end;
-
-
-
-proc шаблон_ПриСчитывании;
-  inherited шаблон_ПриСчитывании;
-  ПрочитатьПолучателяПособия;
-  ВидФормы;
-end;
-
- proc кнОк_ПриНажатии(B1: Button);
-   ПолучательПособия.Сохранить;
-   inherited кнОк_ПриНажатии(B1);
- end;
-
-
---}}
-
---{{ Обработчики событий клеток шаблона
-
-func ПолеСтрахСлучай_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
-  Result = '';
-  if (Cell.Contents = 'ИмяСтрахСлучая') :
-    return ИмяСтраховогоСлучая(ТипПособия);
-  fi;
-end;
-
-func ПолеПолучатель_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): variant;
-  var локсекц : TemplateSection;
-  var locRow,locCol : integer;
-    локсекц = Cell.Owner;
-    locRow = Cell.Row;
-    locCol = Cell.Column -1;
-  Result = '';
-  if (локсекц.Cell[locCol,locRow].Contents = 'Фамилия') :
-    return ПолучательПособия.ФамилияПолучателя;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'Имя') :
-    return ПолучательПособия.ИмяПолучателя;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'Отчество') :
-    return ПолучательПособия.ОтчествоПолучателя;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'Телефон') :
-    return ПолучательПособия.Телефон;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'ДатаРождения') :
-    return ПолучательПособия.ДатаРождения;
-  fi;
-end;
-
-
-func ПолеПолучатель_ПриВходе (Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
-    return true;
-end;
-
-func ПолеПолучатель_ПриВводе(Cell :TemplateCell; Value : variant) :Logical;
-  var локсекц : TemplateSection;
-  var locRow,locCol : integer;
-    локсекц = Cell.Owner;
-    locRow = Cell.Row;
-    locCol = Cell.Column -1;
-    Result = false;
-  if (локсекц.Cell[locCol,locRow].Contents = 'Фамилия') :
-    ПолучательПособия.ЗапомнитьФамилияПолучателя(value);
-    return true;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'Имя') :
-    ПолучательПособия.ЗапомнитьИмяПолучателя(value);
-    return true;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'Отчество') :
-    ПолучательПособия.ЗапомнитьОтчествоПолучателя(value);
-    return true;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'Телефон') :
-    ПолучательПособия.ЗапомнитьТелефон(value);
-    return true;
-  elsif (локсекц.Cell[locCol,locRow].Contents = 'ДатаРождения') :
-    ПолучательПособия.ЗапомнитьДатаРождения(value);
-    return true;
-  fi;
-end;
-
-
-
-
-
-
---}}
-
---{{ Обработчики событий прочих объектов шаблона
---}}
-
---{{ Дополнительные команды
---}}
-
---{{ Вспомогательные методы
-
-proc ПрочитатьПолучателяПособия;
-  var локПолучатель : Данные.ПолучательПособия;
-  if (Self.Record.State = Created) :
-     ПолучательПособия = ЭлементыДанных.ПолучательПособия.СоздатьПоЗаписиСубъекта(Субъект);
-  else
-    локПолучатель =  ПолучательДляСтрахСлучая (Self.Record);
-    ПолучательПособия = ЭлементыДанных.ПолучательПособия.СоздатьПоЗаписиПолучателя(локПолучатель);
-  fi;
-end;
-
-proc ВидФормы;
-  var locForm: Данные.блПолучатель;
-  var Cell : TemplateCell;
-  locForm = Данные.блПолучатель.CreateExt (ПолучательПособия);
-  Template.BeginModify;
-    LoadForm(фреймШаблон,locForm);
-    Template.CurrentFrame = фреймШаблон;
-  Template.EndModify;
-end;
-
-
-
-
-
---}}
-
-
-func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
-  var aTxt: string[];
-  with СИС2.СтроковыеФункции  do
-    aTxt[1] = MarkInGray(НашеУчреждение.Наим);
-    aTxt[2] = 'Cтраховой случай ' + Код + ':' + ИмяСтраховогоСлучая(ТипПособия) ;
-    aTxt[3] = MarkInGray(Субъект.Имя);
-    Return МассивСтрокВТекст(aTxt);
-  end;
-end;
-
+--}
 
 end
