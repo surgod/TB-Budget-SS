@@ -18,19 +18,19 @@ inobject private
 --{ Обработчики событий бланка
 
 proc кнАдресРег_ПриНажатии (Sender: Button);
- var локАдрес : Справочники.АдресСоцСтрах;
- var locForm: Справочники.редАдресСоцСтрах;
+ --var локАдрес : Справочники.АдресСоцСтрах;
+ --var locForm: Справочники.редАдресСоцСтрах;
    --локАдрес = АдресССПолучателяПоТипу(Self.Record,тапПрописка);
-   locForm = Справочники.редАдресСоцСтрах.Create;
-   locForm.ShowEx(локАдрес , Kernel.Window.ModalWindow);
+   --locForm = Справочники.редАдресСоцСтрах.Create;
+   --locForm.ShowEx(локАдрес , Kernel.Window.ModalWindow);
 end;
 
 proc кнАдресПрож_ПриНажатии (Sender: Button);
- var локАдрес : Справочники.АдресСоцСтрах;
- var locForm: Справочники.редАдресСоцСтрах;
+ --var локАдрес : Справочники.АдресСоцСтрах;
+ --var locForm: Справочники.редАдресСоцСтрах;
    --локАдрес = АдресССПолучателяПоТипу(Self.Record,тапФактический);
-   locForm = Справочники.редАдресСоцСтрах.Create;
-   locForm.ShowEx(локАдрес , Kernel.Window.ModalWindow);
+  -- locForm = Справочники.редАдресСоцСтрах.Create;
+ --  locForm.ShowEx(локАдрес , Kernel.Window.ModalWindow);
 end;
 
 --}

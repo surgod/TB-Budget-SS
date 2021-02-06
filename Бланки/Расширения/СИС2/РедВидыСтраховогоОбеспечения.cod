@@ -1,0 +1,51 @@
+extends Бюджет_ЗПиДД.Справочники.редВидСтраховогоОбеспечения 'Расширение';
+
+  inobject private
+
+  var флСоцСтрах : CheckBox;
+  var фреймНормативныйАкт : TemplateFrame;
+  -- Обработчики событий шаблона --
+
+  proc шаблон_ПриСоздании (Context: Variant);
+    var UserIsDeveloper: logical;
+    UserIsDeveloper = СИС2.Функции.UserIsDeveloper;
+    extended шаблон_ПриСоздании(Context);
+    if UserIsDeveloper:
+      if (флСоцСтрах = nil):
+        ДобавитьОбъект_флСоцСтрах;
+      fi;
+    fi;
+
+  end;
+
+   proc ДобавитьОбъект_флСоцСтрах;
+    Template.BeginModify;
+    флСоцСтрах = фреймНормативныйАкт.AddObject(CheckBox);
+    флСоцСтрах.Caption = 'Пособие соц.страх';
+    флСоцСтрах.Hint = 'Пособие соц.страх';
+    флСоцСтрах.Height = 5.0;
+    флСоцСтрах.Width = 50;
+    флСоцСтрах.Left = 160;
+    флСоцСтрах.Top = 1;
+    флСоцСтрах.State =  ЭтоПособиеСоцСтрах;
+    Template.EndModify;
+  end;
+
+  proc МодифицироватьШаблон (ШаблонМодифицирован: logical = false);
+    Template.BeginModify;
+    if (флСоцСтрах <> nil):
+      флСоцСтрах.Visible = true;
+      флСоцСтрах.OnClick = 'ИзменитьПосСоц';
+    fi;
+    Template.EndModify;
+    inherited МодифицироватьШаблон(true);
+  end;
+
+  proc ИзменитьПосСоц (C: CheckBox);
+    ЭтоПособиеСоцСтрах = флСоцСтрах.State;
+  end;
+
+
+
+
+end

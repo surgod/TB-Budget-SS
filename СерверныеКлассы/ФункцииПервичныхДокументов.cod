@@ -1,7 +1,58 @@
 class "Функции работы с записями первичных документов";
 
 
-inclass public
+--{ Обработчики событий бланка
+
+  proc шаблон_ПриСоздании (Context: Variant);
+    var UserIsDeveloper: logical;
+    --UserIsDeveloper = СИС2.Функции.UserIsDeveloper;
+    --if UserIsDeveloper:
+      if (кнНастройки = nil):
+        ДобавитьОбъект_Настройки;
+      fi;
+    --fi;
+    extended шаблон_ПриСоздании(Context);
+  end;
+
+
+  -- Вспомогательные методы --
+
+  proc ДобавитьОбъект_Настройки;
+    кнНастройки = фреймНормативныйАкт.AddObject(Button);
+    кнНастройки.Caption = 'Настройка';
+    кнНастройки.Hint = 'Настройка';
+    кнНастройки.Height = 5.6;
+    кнНастройки.Width = 25;
+    кнНастройки.Left = 160;
+    кнНастройки.Top = 1;
+    кнНастройки.Font.Size = StyleByName('Текст шаблона').Font.Size;
+  end;
+
+  proc МодифицироватьШаблон (ШаблонМодифицирован: logical = false);
+    Template.BeginModify;
+    if (кнНастройки <> nil):
+      кнНастройки.Visible = true;
+      кнНастройки.OnClick = 'ОткрытьНастройки';
+    fi;
+    Template.EndModify;
+    inherited МодифицироватьШаблон(true);
+  end;
+  proc ОткрытьНастройки (Sender: Button);
+    var UserIsDeveloper: logical;
+    UserIsDeveloper = СИС2.Функции.UserIsDeveloper;
+    EditorPost;
+    if UserIsDeveloper:
+      Настройки.Справочники.ВСО.редСтандартныеНастройки.ShowFormEx(Self.Record, Kernel.Window.ChildWindow);
+    else
+      Настройки.Справочники.ВСО.редНастройкиПользвателя.ПоказатьМодально(Self.Record);
+    fi;
+    Close;
+  end;
+--}
+
+
+end
+
 
 
 

@@ -1,3 +1,0 @@
-record Банк1 inherited  Данные.БанкРеквизиты title "";
-  field Ntcn  : integer;
-end;
