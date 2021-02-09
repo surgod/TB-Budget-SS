@@ -1,34 +1,32 @@
-class inherited МашинаРеквизитов.Базовые.интЗаписьКодИмя "Интерфейс записи ПолучательПособия";
+class inherited МашинаРеквизитов.Базовые.интЗаписьКодИмя "Интерфейс банковских реквизитов";
 
 inclass public
 
   func СвязанныйКлассЗаписей: class СИС2.Базовая.БазоваяЗапись;
-    Result = Данные.ПолучательПособия;
+    Result = Данные.БанкРеквизиты;
   end;
 
-  func Create: Данные.интПолучательПособия;
+  func Create: Данные.интБанкРеквизиты;
     Result = inherited Create;
-    Result.Record = Данные.ПолучательПособия.Create;
+    Result.Record = Данные.БанкРеквизиты.Create;
   end;
 
-  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Данные.ПолучательПособия): Данные.интПолучательПособия;
+  func ОткрытьПоЗаписи synonym OpenRecord (locRecord: Данные.БанкРеквизиты): Данные.интБанкРеквизиты;
     Result = inherited Create;
     Result.Record = locRecord;
   end;
 
   func БланкРедакторПоУмолчанию: class BlankForm;
-    Result = Данные.редПолучательПособия;
+    Result = Данные.редБанкРеквизиты;
   end;
 
   func КартотекаПоУмолчанию: class CardForm;
-    Result = Данные.картПолучательПособия;
+    Result = Данные.картБанкРеквизиты;
   end;
-
-
 
 inobject public
 
-  Record: Данные.ПолучательПособия;
+  Record: Данные.БанкРеквизиты;
 
   --@doc При создании новой записи
 proc ИнициализироватьПоУмолчанию synonym InitByDefault;
