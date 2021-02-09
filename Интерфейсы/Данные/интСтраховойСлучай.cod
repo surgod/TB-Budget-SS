@@ -17,7 +17,7 @@ inclass public
   end;
 
   func Ѕланк–едакторѕо”молчанию: class BlankForm;
-    Result = ƒанные.ред—траховой—лучай;
+    Result = ƒанные.ред—траховой—лучай1;
   end;
 
   func  артотекаѕо”молчанию: class CardForm;

@@ -1,0 +1,9 @@
+record Справка title "Справка";
+  field СтраховойСлучай : Данные.СтраховойСлучай title "Страховой случай";
+  field СчетчикВерсий : integer title "Счетчик версий справки для страхового случая";
+  field Завершено: logical;
+  field ТипСправки: integer;
+  field Наим : string title "Наименование";
+  field Номер : string title "Номер";
+  field ДатаВыдачи : date title "Дата выдачи";
+end;

@@ -1,7 +1,7 @@
 ﻿[Options]
 Version=7
 Query=.Данные.СтраховойСлучай
-MBlank=.Данные.редСтраховойСлучай
+MBlank=.Данные.редСтраховойСлучай1
 OnMove=картотека_ПриПеремещении
 OnOpenBlank=картотека_ПриОткрытииБланка
 OnCreateRecord=картотека_ПриСозданииЗаписи
@@ -16,8 +16,8 @@ ColumnCount=5
 Column:0=НашеУчреждение.Имя
 Column:1=Субъект.Имя
 Column:2=ДатаСтраховогоСлучая
-Column:3=ТипПособия
-Column:4=ВидСО.Имя
+Column:3=Имя
+Column:4=ТипСтрахСлучая
 TreeWidth=1
 SubTableWidth=0
 SubTableHeight=0
@@ -35,11 +35,11 @@ Width=100
 Caption=Дата наступления страхового случая
 Width=100
 
-[.Column.ТипПособия]
-Caption=ТипПособия
-Width=100
-Alignment=1
-
-[.Column.ВидСО.Имя]
+[.Column.Имя]
 Caption=Наименование
 Width=100
+
+[.Column.ТипСтрахСлучая]
+Caption=ТипСтрахСлучая
+Width=100
+Alignment=1
