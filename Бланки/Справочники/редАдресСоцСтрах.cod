@@ -21,6 +21,8 @@ proc шаблон_ѕриќткрытии(Create :Logical);
     locRow = Cell1.Row;
     locCol = Cell1.Column;
     секц—убъект.Cell[locCol,locRow + 1].Contents = '»м€ получател€ пособи€';
+    Cell1 = секѕозиции“иповјдресов. леткаѕоѕолю["“ипјдресаѕрименен"];
+    Cell1.Enabled = false;
   Template.EndModify;
   inherited шаблон_ѕриќткрытии(Create);
 end;

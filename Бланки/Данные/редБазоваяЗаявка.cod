@@ -1,0 +1,92 @@
+class inherited МашинаРеквизитов.Базовые.блРедакторСИнтерфейсом "Базовый бланк-редактор для заявки на назначение пособий", editor Данные.ЗаявкаНаНазначениеПособия;
+
+import classes Константы,ФункцииПримененияКостант,ФункцииДанных;
+
+--{{ Свойства
+
+  var фреймПолучатель :TemplateFrame;
+  var фреймДокументыПолучателя :TemplateFrame;
+  var фреймДокОснование :TemplateFrame;
+  var фреймРасчет :TemplateFrame;
+  var фреймВыплата :TemplateFrame;
+
+
+inobject public
+
+  var Интерфейс: Данные.интЗаявкаНаНазначениеПособия;
+
+
+--}}
+
+
+inobject private
+
+--дополнительные сведения
+
+var АдресРегистрации : Базовый.Справочники.Адрес;
+var АдресПроживания : Базовый.Справочники.Адрес;
+var УдостоверениеЛичности : Базовый.Справочники.Удостоверение;
+var ДокументОПравеНаПроживание : Базовый.Справочники.Удостоверение;
+var БольничныйЛист : Документы.Кадры.БольничныйЛистСС;
+
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+
+proc шаблон_ПриСчитывании;
+  inherited шаблон_ПриСчитывании;
+  ЗаполнитьЗаписиДопСведений;
+end;
+
+proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+  if (Cell.Style.Name = 'Поле ввода'):
+    if Cell.Enabled: inherited ПриРисовании_КакПолеВвода (Cell, Selected, Color, FieldColor, Font);
+    else             inherited ПриРисовании_КакЗапрещенное (Cell, Selected, Color, FieldColor, Font);
+    fi;
+  elsif (Cell.Style.Name = 'Поле выбора'):
+    if Cell.Enabled: inherited ПриРисовании_КакПолеВыбора (Cell, Selected, Color, FieldColor, Font);
+    else             inherited ПриРисовании_КакЗапрещенное (Cell, Selected, Color, FieldColor, Font);
+    fi;
+  fi;
+end;
+
+
+func ПолеАдрес_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+    if (Cell.Owner.Name = 'секцАдресРег' ) :
+      return АдресСтрокойПоЗаписи(АдресРегистрации);
+    elsif (Cell.Owner.Name = 'секцАдресПрож' ) :
+      return АдресСтрокойПоЗаписи(АдресПроживания);
+    fi;
+end;
+
+
+--}
+
+--{{ Вспомогательные методы
+proc ЗаполнитьЗаписиДопСведений;
+  АдресРегистрации = АдресРегистрацииПоЗаявке(Self.Record);
+  АдресПроживания = АдресПроживанияПоЗаявке(Self.Record);
+  УдостоверениеЛичности = УдЛичностиПоЗаявке(Self.Record);
+  ДокументОПравеНаПроживание = ДокумОПрживанииПоЗаявке(Self.Record);
+  if (ТипДокОснования = ТипГрДок_БЛ) :
+    Документы.Кадры.интБольничныйЛистСС.БольничныйЛистПоЗаявке(Self.Record);
+  fi;
+end;
+--})
+
+
+func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+  var aTxt: string[];
+  with СИС2.СтроковыеФункции  do
+    aTxt[1] = MarkInGray(НашеУчреждение.Наим);
+    aTxt[2] = 'Заявка на назначение '+ ИмяПособияРод(ТипПособия)+' ';
+    aTxt[3] = MarkInGray('Код заявки '+ Код);
+    aTxt[4] = MarkInGray(Сотрудник.Имя);
+    Return МассивСтрокВТекст(aTxt);
+  end;
+end;
+
+
+
+
+
+end

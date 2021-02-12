@@ -10,6 +10,7 @@ record ЗаявкаНаНазначениеПособия inherited МашинаРеквизитов.Базовые.БазоваяКодИм
   field Телефон : string title "Телефон получателя пособия";
   field ИНН : string title "ИНН получателя пособия";
   field СНИЛС : string title "СНИЛС получателя пособия";
+  field ТипДокОснования : integer title "";  --для соц.страх. - это тип группы документов
   field ТипПособия : integer title "";
   field ТипРеестра : integer title "";
   field СпособВыплаты : integer title "";
