@@ -1,14 +1,9 @@
-class inherited МашинаРеквизитов.Базовые.блРедакторСИнтерфейсом "Базовый бланк-редактор для заявки на назначение пособий", editor Данные.ЗаявкаНаНазначениеПособия;
+class inherited МашинаРеквизитов.Базовые.блРедакторСИнтерфейсом "Базовый редактор заявки на назначение и оплату пособия", editor Данные.ЗаявкаНаНазначениеПособия;
 
 import classes Константы,ФункцииПримененияКостант,ФункцииДанных;
+import СИС2 classes Константы;
 
 --{{ Свойства
-
-  var фреймПолучатель :TemplateFrame;
-  var фреймДокументыПолучателя :TemplateFrame;
-  var фреймДокОснование :TemplateFrame;
-  var фреймРасчет :TemplateFrame;
-  var фреймВыплата :TemplateFrame;
 
 
 inobject public
@@ -21,13 +16,35 @@ inobject public
 
 inobject private
 
---дополнительные сведения
+  --фреймы
+
+  var фреймСведенияОЗаявке :TemplateFrame;
+  var фреймПолучатель :TemplateFrame;
+  var фреймДокументыПолучателя :TemplateFrame;
+  var фреймДокументыПособия :TemplateFrame;
+  var фреймРасчет :TemplateFrame;
+  var фреймВыплата :TemplateFrame;
+
+  --кнопки
+
+  var кнЗавершить :Button;
+
+
+
+--сведения о заявке
+
+var ПризнакЗавершения : string = if (Завершено : 'Заявка завершена',  '');
+var НомерРеестра : string = if(ПозицияРеестра <> nil : Str(ПозицияРеестра.Реестр.НомерЗаДень), '');
+
+--Связанные записи
+
+var ПозицияРеестра : Документы.ФСС.ПозицияРеестра;
 
 var АдресРегистрации : Базовый.Справочники.Адрес;
 var АдресПроживания : Базовый.Справочники.Адрес;
 var УдостоверениеЛичности : Базовый.Справочники.Удостоверение;
 var ДокументОПравеНаПроживание : Базовый.Справочники.Удостоверение;
-var БольничныйЛист : Документы.Кадры.БольничныйЛистСС;
+
 
 
 --------------------------------------------------------------------------------
@@ -36,16 +53,35 @@ var БольничныйЛист : Документы.Кадры.БольничныйЛистСС;
 proc шаблон_ПриСоздании(Context :Variant);
   inherited шаблон_ПриСоздании(Context);
   ОбновитьСписокПоля(фреймВыплата.CellByField['СпособВыплаты'], ТипыСпособовВыплатыФЛ);
-  ОбновитьСписокПоля(фреймВыплата.CellByField['ТипИнфо'], ТипыИнфо);
+  ОбновитьСписокПоля(фреймСведенияОЗаявке.CellByField['ТипИнфо'], ТипыИнфо);
+  ОбновитьСписокПоля(фреймСведенияОЗаявке.CellByField['ПричинаПерерасчета'], ТипыПричиныПерерасчета);
 end;
 
 
 proc шаблон_ПриСчитывании;
   inherited шаблон_ПриСчитывании;
-  ЗаполнитьЗаписиДопСведений;
+  ПрочитатьПозициюРеестра;
+  НайтиСвязанныеЗаписи;
 end;
 
 proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+  if (Cell.Contents = 'ПризнакЗавершения') :
+    if (Завершено) :
+      Cell.Color = clYellow;
+      return;
+    else
+      Cell.Color = clNoColor;
+      return;
+    fi;
+  elsif (Cell.Contents = 'НомерРеестра') :
+    if (ПозицияРеестра <> nil) :
+      Cell.Color = clYellow;
+      return;
+    else
+      Cell.Color = clNoColor;
+      return;
+    fi;
+  end;
   if (Cell.Style.Name = 'Поле ввода'):
     if Cell.Enabled: inherited ПриРисовании_КакПолеВвода (Cell, Selected, Color, FieldColor, Font);
     else             inherited ПриРисовании_КакЗапрещенное (Cell, Selected, Color, FieldColor, Font);
@@ -56,6 +92,7 @@ proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Intege
     fi;
   fi;
 end;
+
 
 
 func ПолеАдрес_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
@@ -105,11 +142,18 @@ end;
 
 func ПолеВыплата_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
   var locForm: BlankForm;
+  var локСтрока : string;
   Result = false;
   if (Cell.Contents = 'Открыть') :
-    ТББ_Базовый.Библио.ВводНомераБанкСчета(СчетПолучателя);
+    локСтрока = СчетПолучателя;
+    if ( cmOk = ТББ_Базовый.Библио.ВводНомераБанкСчета(локСтрока)) :
+      СчетПолучателя = локСтрока;
+    fi;
   elsif (Cell.Contents = 'БИК') :
-    ТББ_Базовый.Библио.ВводНомераБик(БИК);
+    локСтрока = БИК;
+    if ( cmOk = ТББ_Базовый.Библио.ВводНомераБик(локСтрока)) :
+      БИК = локСтрока;
+    fi;
   elsif (Cell.Contents = 'НомерКарты') :
     locForm = Бюджет_ЗПиДД.Служебные.блВводНомераБанкКарты.CreateEx(НомерКарты);
     if (cmOk = locForm.ShowEx( ,Window.ModalWindow)):
@@ -119,19 +163,40 @@ func ПолеВыплата_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template.
 end;
 
 
+proc кнЗавершить_ПриНажатии (Sender: Button);
+  var Note : string;
+  if (кнЗавершить.Caption = 'Завершить') :
+    --нужна проверка
+     Завершено = true;
+  else
+    if (ПозицияРеестра <> nil) :
+      Note = 'Нельзя снять с заявки признак завершения, так как она включена в реестр';
+      Message(Note);
+      return;
+    else
+      Завершено = false;
+    fi;
+  fi;
+end;
+
+proc кнВРеестр_ПриНажатии (Sender: Button);
+end;
+
 
 
 --}
 
 --{{ Вспомогательные методы
-proc ЗаполнитьЗаписиДопСведений;
+
+proc ПрочитатьПозициюРеестра;
+  ПозицияРеестра = Интерфейс.НайтиПозициюРеестра;
+end;
+
+proc НайтиСвязанныеЗаписи;
   АдресРегистрации = Справочники.интАдресСоцСтрах.АдресРегистрацииПоЗаявке(Self.Record);
   АдресПроживания = Справочники.интАдресСоцСтрах.АдресПроживанияПоЗаявке(Self.Record);
   УдостоверениеЛичности = Справочники.интУдостоверениеСоцСтрах.УдЛичностиПоЗаявке(Self.Record);
   ДокументОПравеНаПроживание = Справочники.интУдостоверениеСоцСтрах.ДокумОПрживанииПоЗаявке(Self.Record);
-  if (ТипДокОснования = ТипГрДок_БЛ) :
-    Документы.Кадры.интБольничныйЛистСС.БольничныйЛистПоЗаявке(Self.Record);
-  fi;
 end;
 
 proc ОткрытьАдресРегистрации;
@@ -203,6 +268,95 @@ proc УдалитьДокументОПравеНаПроживание;
   fi;
 end;
 
+proc МодифицироватьШаблон_По_Завершено;
+  Template.BeginModify;
+    МодифицироватьФреймСведенияОЗаявке;
+    МодифицироватьФреймПолучатель;
+    МодифицироватьФреймДокументыПолучателя;
+    --ЗапретитьВводДокументовПособия;
+    --ЗапретитьВводИнформацииОРасчете;
+    МодифицироватьФреймВыплата;
+    --КнопкиНаЭкран;
+  Template.EndModify;
+end;
+
+proc МодифицироватьФреймСведенияОЗаявке;
+  if (Завершено) :
+    фреймСведенияОЗаявке.CellByField['ТипИнфо'].Enabled = false;
+    фреймСведенияОЗаявке.CellByField['ПричинаПерерасчета'].Enabled = false;
+  else
+    фреймСведенияОЗаявке.CellByField['ТипИнфо'].Enabled = true;
+    фреймСведенияОЗаявке.CellByField['ПричинаПерерасчета'].Enabled = true;
+  fi;
+end;
+
+proc МодифицироватьФреймПолучатель;
+  var локСекц : TemplateSection;
+    if (Завершено) :
+      фреймПолучатель.CellByField['ФамилияПолучателя'].Enabled = false;
+      фреймПолучатель.CellByField['ИмяПолучателя'].Enabled = false;
+      фреймПолучатель.CellByField['ОтчествоПолучателя'].Enabled = false;
+      фреймПолучатель.CellByField['ИНН'].Enabled = false;
+      фреймПолучатель.CellByField['СНИЛС'].Enabled = false;
+      фреймПолучатель.CellByField['ДатаРождения'].Enabled = false;
+      локСекц = СекцияПоИмени('секцАдресРег',фреймПолучатель);
+      локСекц.CellByField['Открыть'].Enabled = false;
+      локСекц = СекцияПоИмени('секцАдресПрож',фреймПолучатель);
+      локСекц.CellByField['Открыть'].Enabled = false;
+      локСекц.CellByField['Удалить'].Enabled = false;
+    else
+      фреймПолучатель.CellByField['ФамилияПолучателя'].Enabled = true;
+      фреймПолучатель.CellByField['ИмяПолучателя'].Enabled = true;
+      фреймПолучатель.CellByField['ОтчествоПолучателя'].Enabled = false;
+      фреймПолучатель.CellByField['ИНН'].Enabled = true;
+      фреймПолучатель.CellByField['СНИЛС'].Enabled = true;
+      фреймПолучатель.CellByField['ДатаРождения'].Enabled = true;
+      локСекц = СекцияПоИмени('секцАдресРег',фреймПолучатель);
+      локСекц.CellByField['Открыть'].Enabled = true;
+      локСекц = СекцияПоИмени('секцАдресПрож',фреймПолучатель);
+      локСекц.CellByField['Открыть'].Enabled = true;
+      локСекц.CellByField['Удалить'].Enabled = true;
+    fi;
+end;
+
+proc МодифицироватьФреймДокументыПолучателя;
+  var локСекц : TemplateSection;
+    if (Завершено) :
+      локСекц = СекцияПоИмени('секцУдЛичн',фреймДокументыПолучателя);
+      локСекц.CellByField['Открыть'].Enabled = false;
+      локСекц = СекцияПоИмени('секцДокПрож',фреймДокументыПолучателя);
+      локСекц.CellByField['Открыть'].Enabled = false;
+      локСекц.CellByField['Удалить'].Enabled = false;
+    else
+      локСекц = СекцияПоИмени('секцУдЛичн',фреймПолучатель);
+      локСекц.CellByField['Открыть'].Enabled = true;
+      локСекц = СекцияПоИмени('секцДокПрож',фреймПолучатель);
+      локСекц.CellByField['Открыть'].Enabled = true;
+      локСекц.CellByField['Удалить'].Enabled = true;
+    fi;
+end;
+
+proc МодифицироватьФреймДокументыПособия;
+end;
+
+proc МодифицироватьФреймРасчет;
+end;
+
+proc МодифицироватьФреймВыплата;
+  if (Завершено) :
+    фреймВыплата.CellByField['СпособВыплаты'].Enabled = false;
+    фреймВыплата.CellByField['БанкНаим'].Enabled = false;
+    фреймВыплата.CellByField['СчетПолучателя'].Enabled = false;
+    фреймВыплата.CellByField['БИК'].Enabled = false;
+    фреймВыплата.CellByField['НомерКарты'].Enabled = false;
+  else
+    фреймВыплата.CellByField['СпособВыплаты'].Enabled = true;
+    фреймВыплата.CellByField['БанкНаим'].Enabled = true;
+    фреймВыплата.CellByField['СчетПолучателя'].Enabled = true;
+    фреймВыплата.CellByField['БИК'].Enabled = true;
+    фреймВыплата.CellByField['НомерКарты'].Enabled = true;
+  fi;
+end;
 
 
 
@@ -219,9 +373,6 @@ func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Acti
     Return МассивСтрокВТекст(aTxt);
   end;
 end;
-
-
-
 
 
 end
