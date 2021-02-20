@@ -145,6 +145,18 @@ end;
 --}}
 
 
+
+func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+  if (РежимаВызова = ТипРежимаСтандарт) :
+    return 'Стандартная настройка вида страхового обеспечения ' + ИнтВидаСО.Record.Код;
+  else
+    return 'Пользовательская настройка вида страхового обеспечения ' + ИнтВидаСО.Record.Код;
+  fi;
+end;
+
+
+
+
 inobject public
 
 --{{ Вспомогательные методы
@@ -159,6 +171,8 @@ proc ПрочитатьПоля;
 end;
 
 --}}
+
+
 
 
 end
