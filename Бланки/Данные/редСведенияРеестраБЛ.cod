@@ -1,0 +1,81 @@
+class inherited СИС2.БазовыйБланкРедактор "Редактор сведений реестра БЛ",  editor Данные.СведенияРеестраБЛ;
+
+import classes Константы,ФункцииПримененияКостант;--,ФункцииДанных;
+
+
+--{{ Свойства
+
+
+inobject public
+
+var ИмяПоля : string;
+var ПризнакЗавершения : logical;
+
+--}}
+
+inclass public
+
+func СоздатьПоИмениПоля (локИмяПоля : string;
+                         локПризнакЗавершения : logical) : Данные.редСведенияРеестраБЛ;
+  Result = Данные.редСведенияРеестраБЛ.Create;
+  Result.ИмяПоля = локИмяПоля;
+  Result.ПризнакЗавершения = локПризнакЗавершения;
+end;
+
+func ПоказатьМодально synonym ShowModal(локСведения : Данные.СведенияРеестраБЛ;
+                                        локИмяПоля : string;
+                                        локПризнакЗавершения : logical) : integer;
+  var locForm : Данные.редСведенияРеестраБЛ;
+    locForm = СоздатьПоИмениПоля(локИмяПоля,локПризнакЗавершения);
+    if cmOk = locForm.ShowFormEx(локСведения, Kernel.Window.ModalWindow):
+      Return cmOk;
+    fi;
+end;
+
+inobject private
+
+--фреймы
+
+var фреймФорма : TemplateFrame;
+var фреймНомерБЛ : TemplateFrame;
+var фреймПричина : TemplateFrame;
+
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+
+proc шаблон_ПриОткрытии(Create :Logical);
+  inherited шаблон_ПриОткрытии(Create);
+  ВидФормы;
+end;
+
+func ПолеНомерБЛ_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
+  var локСтрока : string;
+  Result = false;
+  if (Cell.Contents = 'НомерБЛ') :
+    локСтрока = НомерБЛ;
+    if ( cmOk = Бюджет_Персонал.Служебные.блВводНомераБЛ.ВыполнитьВвод(локСтрока)) :
+      НомерБЛ = локСтрока;
+    fi;
+  elsif (Cell.Contents = 'ПродолжениеБЛ') :
+    локСтрока = ПродолжениеБЛ;
+    if ( cmOk = Бюджет_Персонал.Служебные.блВводНомераБЛ.ВыполнитьВвод(локСтрока)) :
+      ПродолжениеБЛ = локСтрока;
+    fi;
+  fi;
+end;
+--}
+
+--{ Вспомогательные методы
+
+proc ВидФормы;
+  Template.BeginModify;
+    фреймФорма.ShowTabs = false;
+    if (ИмяПоля = 'НомерБЛ') :
+      Template.CurrentFrame = фреймНомерБЛ;
+    fi;
+  Template.EndModify;
+end;
+
+--}
+
+end
