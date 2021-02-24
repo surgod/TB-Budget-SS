@@ -188,6 +188,26 @@ func »м€—пособа¬ыплаты(лок—пособ¬ыплаты : integer) : string;
     fi;
 end;
 
+func »м€“ипа‘ормыЅЋ(лок“ип‘ормыЅЋ : integer) : string;
+  var ii : integer;
+    Result ='' ;
+    ii = SearchInArray(“ипы‘ормЅЋ, лок“ип‘ормыЅЋ, [1]);
+    if (ii > 0 ) :
+      Result = “ипы‘ормЅЋ[ii,2] ;
+    fi;
+end;
+
+func ѕолное»м€‘ормыЅЋ(лок“ип‘ормыЅЋ : integer) : string;
+  Result = '';
+  if (лок“ип‘ормыЅЋ = “ип‘ормыЅЋЅум) :
+     Result = 'Ћисток нетрудоспособности';
+  elsif (лок“ип‘ормыЅЋ = “ип‘ормыЅЋЁл) :
+     Result = 'Ёлектронный листок нетрудоспособности';
+  fi;
+end;
+
+
+
 func »м€“ипа»нфо(локтип»нфо : integer) : string;
   var ii : integer;
     Result ='' ;

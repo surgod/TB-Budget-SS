@@ -55,6 +55,7 @@ var НомерРеестра : string = if(ПозицияРеестра <> nil : Str(ПозицияРеестра.Реестр
 var ВидСО : Бюджет_ЗПиДД.Справочники.ВидыСтраховогоОбеспечения;
 
 var ПозицияРеестра : Документы.ФСС.ПозицияРеестра;  --определяется при считывании
+var ЗаголовокЗаявки : string;
 
 --интерфейсф связанных записей
 
@@ -87,7 +88,6 @@ proc шаблон_ПриСоздании(Context :Variant);
   ОбновитьСписокПоля(фреймВыплата.CellByField['СпособВыплаты'], ТипыСпособовВыплатыФЛ);
   ОбновитьСписокПоля(фреймОсновныеСведения.CellByField['ТипИнфо'], ТипыИнфо);
   ОбновитьСписокПоля(фреймОсновныеСведения.CellByField['ПричинаПерерасчета'], ТипыПричиныПерерасчета);
-  ОбновитьСписокПоля(фреймСведенияБЛ.CellByField['ТипФормыБЛ'], ТипыФормБЛ);
 end;
 
 
@@ -160,7 +160,21 @@ proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Intege
   fi;
 end;
 
+func ОсновныеСведения_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = '';
+  if (Cell.Contents = 'ИмяТипаПособия' ) :
+    return  ИмяТипаПособия(ТипПособия);
+  elsif (Cell.Contents = 'ИмяТипаРеестра'  ) :
+    return  ПолноеИмяТипаРеестра(ТипРеестра);
+  fi;
+end;
 
+proc ОсновныеСведения_ПриВыходе(Cell: TemplateCell; Index: Integer);
+  if (Cell.Contents = 'НомерБум' ) :
+    ЗаполнитьЗаголовокЗаявки;
+    inherited Поле_ПриВыходе(Cell,Index);
+  fi;
+end;
 
 func ПолеАдрес_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
   Result = '';
@@ -460,6 +474,8 @@ proc МодифицироватьШаблонПриСчитывании;
   Template.BeginModify;
     МодифицироватьФреймыПоЗавершено;
     фреймСоставФормы.ShowTabs = false;
+    ЗаголовкЗаявкиНаЭкран;
+    КнопкиДопСервисНаЭкран;
     --УстановитьКнопкиРазделов;
   Template.EndModify;
 end;
@@ -468,6 +484,7 @@ proc МодифицироватьШаблонПоЗавершено;
   Template.BeginModify;
     МодифицироватьФреймыПоЗавершено;
     КнопкиДопСервисНаЭкран;
+    ЗаголовкЗаявкиНаЭкран;
   Template.EndModify;
 end;
 
@@ -544,23 +561,27 @@ proc МодифицироватьФреймДокументыПолучателя;
 end;
 
 proc МодифицироватьФреймСведенияБЛ;
-  if (Завершено) :
-    фреймСведенияБЛ.CellByField['ТипФормыБЛ'].Enabled = false;
-    фреймСведенияБЛ.CellByField['ДатаБЛ'].Enabled = false;
-    фреймСведенияБЛ.CellByField['ДатаСтационар1БЛ'].Enabled = false;
-    фреймСведенияБЛ.CellByField['ДатаСтационар2БЛ'].Enabled = false;
-    фреймСведенияБЛ.CellByField['ДатаВыходаНаРаботу'].Enabled = false;
-    фреймСведенияБЛ.CellByField['ДатаРегистрацииВ_МСЭ'].Enabled = false;
-    фреймСведенияБЛ.CellByField['ЗаключениеМСЭ_Реестр'].Enabled = false;
-  else
-    фреймСведенияБЛ.CellByField['ТипФормыБЛ'].Enabled = true;
-    фреймСведенияБЛ.CellByField['ДатаБЛ'].Enabled = true;
-    фреймСведенияБЛ.CellByField['ДатаСтационар1БЛ'].Enabled = true;
-    фреймСведенияБЛ.CellByField['ДатаСтационар2БЛ'].Enabled = true;
-    фреймСведенияБЛ.CellByField['ДатаВыходаНаРаботу'].Enabled = true;
-    фреймСведенияБЛ.CellByField['ДатаРегистрацииВ_МСЭ'].Enabled = true;
-    фреймСведенияБЛ.CellByField['ЗаключениеМСЭ_Реестр'].Enabled = true;
-  fi;
+  var локСекц : TemplateSection;
+  var i,locCol  : integer;
+  var Cell : TemplateCell;
+    Cell = фреймСведенияБЛ.CellByField['ФормаБЛ_Реестр'];
+    локСекц =Cell.Owner;
+    locCol = Cell.Column;
+    if (Завершено) :
+      for i = 1..локСекц.RowsCount do
+        if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+          локСекц.Cell[locCol,i].Enabled = false;
+          локСекц.Cell[locCol,i].Button = false;
+        fi;
+      end;
+    else
+      for i = 1..локСекц.RowsCount do
+        if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+          локСекц.Cell[locCol,i].Enabled = true;
+          локСекц.Cell[locCol,i].Button = true;
+        fi;
+      end;
+    fi;
 end;
 
 proc МодифицироватьФреймРасчетБЛ;
@@ -601,6 +622,32 @@ proc КнопкиДопСервисНаЭкран;
   fi;
 end;
 
+proc ЗаголовкЗаявкиНаЭкран;
+  var локСекц : TemplateSection;
+    локСекц = СекцияПоИмени("секцЗаголовокЗаявки",фреймСодержание);
+    ЗаполнитьЗаголовокЗаявки;
+    if (Завершено) :
+      локСекц.Row[1].Visible = false;
+      локСекц.Row[2].Visible = true;
+    else
+      локСекц.Row[1].Visible = true;
+      локСекц.Row[2].Visible = false;
+    fi;
+end;
+
+proc ЗаполнитьЗаголовокЗаявки ;
+  ЗаголовокЗаявки = 'Номер заявки '+ НомерБум+ '.';
+  if (Завершено) :
+    ЗаголовокЗаявки = ЗаголовокЗаявки + ' Заявка завершена';
+  fi;
+  if (ПозицияРеестра <> nil) :
+    ЗаголовокЗаявки = ЗаголовокЗаявки + ', включена в реестр №';
+  else
+    ЗаголовокЗаявки = ЗаголовокЗаявки + '.';
+  fi;
+end;
+
+
 
 
 --})
@@ -631,8 +678,8 @@ func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Acti
   with СИС2.СтроковыеФункции  do
     aTxt[1] = MarkInGray(НашеУчреждение.Наим);
     aTxt[2] = 'Заявка на назначение '+ ИмяПособияРод(ТипПособия)+' ';
-    aTxt[3] = MarkInGray('Номер '+ НомерБум);
-    aTxt[4] = MarkInGray(Сотрудник.Имя);
+    --aTxt[3] = MarkInGray('Номер '+ НомерБум);
+    aTxt[3] = MarkInGray(Сотрудник.Имя);
     Return МассивСтрокВТекст(aTxt);
   end;
 end;

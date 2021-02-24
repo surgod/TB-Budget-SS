@@ -27,7 +27,7 @@ func ѕоказатьћодально synonym ShowModal(лок—ведени€ : ƒанные.—ведени€–еестраЅЋ;
                                         локѕризнак«авершени€ : logical) : integer;
   var locForm : ƒанные.ред—ведени€–еестраЅЋ;
     locForm = —оздатьѕо»мениѕол€(лок»м€ѕол€,локѕризнак«авершени€);
-    if cmOk = locForm.ShowFormEx(лок—ведени€, Kernel.Window.ModalWindow):
+    if cmOk = locForm.ShowEx(лок—ведени€, Kernel.Window.ModalWindow):
       Return cmOk;
     fi;
 end;
@@ -37,15 +37,31 @@ inobject private
 --фреймы
 
 var фрейм‘орма : TemplateFrame;
-var фреймЌомерЅЋ : TemplateFrame;
+var фрейм–еквизитыЅЋ : TemplateFrame;
 var фреймѕричина : TemplateFrame;
+var фрейм„лены—емьи : TemplateFrame;
+var фреймѕериод¬—тационаре : TemplateFrame;
+
+
+--имена полей редактора за€вки, которые редактируютс€ в фрейме ЅЋ
+
+var »менаƒл€‘рейма–еквЅЋ[] : string = ['‘ормаЅЋ_–еестр','ЌомерЅЋ_–еестр','ƒатаЅЋ_–еестр'];
+var »менаƒл€‘реймаѕричина[] : string = ['ѕричина_–еестр'];
+var »менаƒл€‘рейма„лены—емьи[] : string = ['„лен—емьи1_–еестр', '„лен—емьи2_–еестр'];
+var »менаƒл€‘реймаѕериод¬—тационаре[] : string = ['ѕериод¬—тационаре_–еестр'];
 
 --------------------------------------------------------------------------------
 --{ ќбработчики событий бланка
 
+proc шаблон_ѕри—оздании(Context :Variant);
+  inherited шаблон_ѕри—оздании(Context);
+  ќбновить—писокѕол€(фрейм–еквизитыЅЋ.CellByField['“ип‘ормыЅЋ'], “ипы‘ормЅЋ);
+end;
+
+
 proc шаблон_ѕриќткрытии(Create :Logical);
-  inherited шаблон_ѕриќткрытии(Create);
-  ¬ид‘ормы;
+ inherited шаблон_ѕриќткрытии(Create);
+ ¬ид‘ормы;
 end;
 
 func ѕолеЌомерЅЋ_ѕри¬ходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
@@ -70,8 +86,14 @@ end;
 proc ¬ид‘ормы;
   Template.BeginModify;
     фрейм‘орма.ShowTabs = false;
-    if (»м€ѕол€ = 'ЌомерЅЋ') :
-      Template.CurrentFrame = фреймЌомерЅЋ;
+    if (»м€ѕол€ in »менаƒл€‘рейма–еквЅЋ) :
+      Template.CurrentFrame = фрейм–еквизитыЅЋ;
+    elsif (»м€ѕол€ in »менаƒл€‘реймаѕричина) :
+      Template.CurrentFrame = фреймѕричина;
+    elsif (»м€ѕол€ in »менаƒл€‘рейма„лены—емьи) :
+      Template.CurrentFrame = фрейм„лены—емьи;
+    elsif (»м€ѕол€ in »менаƒл€‘реймаѕериод¬—тационаре) :
+      Template.CurrentFrame = фреймѕериод¬—тационаре;
     fi;
   Template.EndModify;
 end;
