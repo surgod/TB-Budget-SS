@@ -116,5 +116,83 @@ proc «аписать–асчет——(локЌазначениеѕособи€ : Ѕюджет_«ѕиƒƒ.–асчетныеќперации.Ќазн
     fi;
 end;
 
+--дл€ полей, заданных в бланках как вычислимые пол€
+
+func ѕоле–едактораѕри¬ыводе(лок»м€ѕол€ : string) : variant;
+  Result = '';
+  if (лок»м€ѕол€ = '—таж_–еестр') :
+    return —таж_–еестр;
+  elsif (лок»м€ѕол€ = '“рудƒогƒо_6_ћес€цев_–еестр') :
+    return “рудƒогƒо_6_ћес€цев_–еестр;
+  elsif (лок»м€ѕол€ = '”слови€»счислени€_–еестр') :
+    return ”слови€»счислени€_–еестр;
+  fi;
+end;
+
+
+inobject private
+
+func —таж_–еестр : string;
+  Result = '—таж '+ —таж—трокой(Self.Record.—таховой—тажЋет,Self.Record.—таховой—тажћес);
+  if (Self.Record.ЌестраховойѕериодЋет <> 0 or Self.Record.Ќестраховойѕериодћес <> 0) :
+    Result =  Result + ' / в т.ч. нестрах.периоды ' +
+              —таж—трокой(Self.Record.ЌестраховойѕериодЋет,Self.Record.Ќестраховойѕериодћес);
+  fi;
+end;
+
+func “рудƒогƒо_6_ћес€цев_–еестр : string;
+  Result = '';
+  if (Self.Record.“рудƒогƒо_6_ћес€цев_— <> nil) :
+    Result = 'с '+ Str(Self.Record.“рудƒогƒо_6_ћес€цев_—);
+  fi;
+  if (Self.Record.“рудƒогƒо_6_ћес€цев_ѕо <> nil) :
+    Result = Result + ' по '+ Str(Self.Record.“рудƒогƒо_6_ћес€цев_ѕо);
+  fi;
+end;
+
+func ”слови€»счислени€_–еестр : string;
+  Result = '';
+  if (Self.Record. од”словий»счислени€1 <> '') :
+    Result = Self.Record. од”словий»счислени€1;
+  fi;
+  if (Self.Record. од”словий»счислени€2 <> '') :
+    Result = Result + if(Result <> '' : ',', '') + Self.Record. од”словий»счислени€2;
+  fi;
+  if (Self.Record. од”словий»счислени€3 <> '') :
+    Result = Result + if(Result <> '' : ',', '') + Self.Record. од”словий»счислени€3;
+  fi;
+end;
+
+
+
+func —таж—трокой(локЋет : integer; локћес€цев : integer) : string;
+  var ss : string;
+    Result = '';
+    if (локЋет <> 0) :
+      Result = —таж—трокой√оды(локЋет);
+    fi;
+    ss = '';
+    if (локћес€цев <> 0) :
+      ss = Str(локћес€цев) + 'мес.';
+    fi;
+    Result = Result + if(Result <>'' and ss <>' ' : ' ', '') + ss;
+end;
+
+func —таж—трокой√оды(локЋет : integer) : string;
+  var ii,jj : integer;
+  var ss : string;
+    Result = Str(локЋет);
+    ii = локЋет - Int(Trunc(локЋет/10)) * 10;
+    jj = локЋет - Int(Trunc(локЋет/100)) * 100;
+    ss = 'лет';
+    if (ii = 1 and jj <> 11) :
+      ss = 'год';
+    elsif ((ii  in [2,3,4]) and (not jj in [12,13,14])) :
+      ss = 'года';
+    fi;
+    Result = Result + ' ' + ss;
+end;
+
+
 
 end

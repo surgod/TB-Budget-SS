@@ -245,6 +245,24 @@ func ПолеСведенияБЛ_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Templa
   fi;
 end;
 
+func ПолеРасчетБЛ_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = '';
+  if (ИнтРасчет <> nil) :
+    return ИнтРасчет.ПолеРедактораПриВыводе(Cell.Contents);
+  fi;
+end;
+
+
+func ПолеРасчетБЛ_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
+  Result = false;
+  if (ИнтРасчет <> nil) :
+    EditorPost;
+    Данные.редРасчетРеестраБЛ.ПоказатьМодально(ИнтРасчет.Record,Cell.Contents,Завершено);
+  fi;
+end;
+
+
+
 
 func ПолеВыплата_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
   var locForm: BlankForm;
