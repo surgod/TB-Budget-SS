@@ -41,12 +41,18 @@ var фрейм‘орма : TemplateFrame;
 var фрейм—таж : TemplateFrame;
 var фрейм“рудƒог6ћес : TemplateFrame;
 var фрейм”слови€»счисл : TemplateFrame;
+var фреймѕериодыѕросто€ : TemplateFrame;
+var фреймѕериодќплаты : TemplateFrame;
+
 
 --имена полей редактора за€вки, которые редактируютс€ в фреймефрейм—таж
 
 var »менаƒл€‘рейма—таж[] : string = ['—таж_–еестр'];
 var »менаƒл€‘рейма“рудƒог6ћес[] : string = ['“рудƒогƒо_6_ћес€цев_–еестр'];
 var »менаƒл€‘рейма”слови€»счисл[] : string = ['”слови€»счислени€_–еестр'];
+var »менаƒл€‘реймаѕериодыѕросто€[] : string = ['ѕериодыѕросто€_–еестр'];
+var »менаƒл€‘реймаѕериодќплаты[] : string = ['ѕериодќпаты_–еестр'];
+
 
 --------------------------------------------------------------------------------
 --{ ќбработчики событий бланка
@@ -55,6 +61,18 @@ proc шаблон_ѕриќткрытии(Create :Logical);
  inherited шаблон_ѕриќткрытии(Create);
  ¬ид‘ормы;
 end;
+
+func ѕолеѕериодыѕросто€_ѕриЌажатии(Cell:TemplateCell; Action : Template.ClickTypes) : Logical;
+  var locRow : integer;
+    Result = false;
+    if (Cell.Contents = '+') :
+      Self.Record.ѕериодыѕросто€.Add;
+    elsif (Cell.Contents = 'x') :
+      locRow = Cell.Row;
+      Self.Record.ѕериодыѕросто€.Delete(locRow);
+    fi;
+end;
+
 
 
 --}
@@ -70,6 +88,10 @@ proc ¬ид‘ормы;
       Template.CurrentFrame = фрейм“рудƒог6ћес;
     elsif (»м€ѕол€ in »менаƒл€‘рейма”слови€»счисл) :
       Template.CurrentFrame = фрейм”слови€»счисл;
+    elsif (»м€ѕол€ in »менаƒл€‘реймаѕериодыѕросто€) :
+      Template.CurrentFrame = фреймѕериодыѕросто€;
+    elsif (»м€ѕол€ in »менаƒл€‘реймаѕериодќплаты) :
+      Template.CurrentFrame = фреймѕериодќплаты;
     fi;
   Template.EndModify;
 end;

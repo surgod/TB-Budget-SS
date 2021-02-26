@@ -114,6 +114,17 @@ proc ЗаписатьРасчетСС(локНазначениеПособия : Бюджет_ЗПиДД.РасчетныеОперации.Назн
         Self.Record.ГодРасчета[j].КДВРасчете = локРасчетСзСС.ГодРасчета[i].КДКорр;
       end;
     fi;
+    j = Self.Record.ГодРасчета.Count;
+    if (j <> 0) :
+      Self.Record.ГодВРасчете1 = Self.Record.ГодРасчета[1].УчетныйГод;
+      if (Self.Record.ГодРасчета[1].СуммаВРасчете <> 0 and Self.Record.ГодРасчета[1].КДВРасчете <> 0) :
+        Self.Record.СреднийЗаработок1 = Round(Self.Record.ГодРасчета[1].СуммаВРасчете / Self.Record.ГодРасчета[1].КДВРасчете,2);
+      fi;
+      Self.Record.ГодВРасчете2 = Self.Record.ГодРасчета[j].УчетныйГод;
+      if (Self.Record.ГодРасчета[j].СуммаВРасчете <> 0 and Self.Record.ГодРасчета[j].КДВРасчете <> 0) :
+        Self.Record.СреднийЗаработок1 = Round(Self.Record.ГодРасчета[j].СуммаВРасчете / Self.Record.ГодРасчета[j].КДВРасчете,2);
+      fi;
+    fi;
 end;
 
 --для полей, заданных в бланках как вычислимые поля
@@ -126,6 +137,14 @@ func ПолеРедактораПриВыводе(локИмяПоля : string) : variant;
     return ТрудДогДо_6_Месяцев_Реестр;
   elsif (локИмяПоля = 'УсловияИсчисления_Реестр') :
     return УсловияИсчисления_Реестр;
+  elsif (локИмяПоля = 'ПериодыПростоя_Реестр') :
+    return ПериодыПростоя_Реестр;
+  elsif (локИмяПоля = 'ПериодОпаты_Реестр') :
+    return ПериодОпаты_Реестр;
+  elsif (локИмяПоля = 'РасчетныйПериод_Реестр') :
+    return РасчетныйПериод_Реестр;
+  elsif (локИмяПоля = 'СреднийЗаработок_Реестр') :
+    return РасчетныйПериод_Реестр;
   fi;
 end;
 
@@ -141,13 +160,7 @@ func Стаж_Реестр : string;
 end;
 
 func ТрудДогДо_6_Месяцев_Реестр : string;
-  Result = '';
-  if (Self.Record.ТрудДогДо_6_Месяцев_С <> nil) :
-    Result = 'с '+ Str(Self.Record.ТрудДогДо_6_Месяцев_С);
-  fi;
-  if (Self.Record.ТрудДогДо_6_Месяцев_По <> nil) :
-    Result = Result + ' по '+ Str(Self.Record.ТрудДогДо_6_Месяцев_По);
-  fi;
+  return Период_С_По(Self.Record.ТрудДогДо_6_Месяцев_С,Self.Record.ТрудДогДо_6_Месяцев_По);
 end;
 
 func УсловияИсчисления_Реестр : string;
@@ -162,6 +175,65 @@ func УсловияИсчисления_Реестр : string;
     Result = Result + if(Result <> '' : ',', '') + Self.Record.КодУсловийИсчисления3;
   fi;
 end;
+
+func ПериодыПростоя_Реестр : string;
+ var i : integer;
+ var ss : string;
+ var aTxt: string[];
+   Result = '';
+   aTxt  = nil;
+   if (Self.Record.ПериодыПростоя.Count = 0) :
+     return '';
+   fi;
+   for i = 1..Self.Record.ПериодыПростоя.Count do
+     ss = Период_С_По(Self.Record.ПериодыПростоя[i].ПериодПростоя_С,Self.Record.ПериодыПростоя[i].ПериодПростоя_По);
+     if (ss <> '') :
+       InsertInArray(aTxt,LengthOfArray(aTxt) + 1, ss);
+       if (LengthOfArray(aTxt) > 1) :
+         aTxt[LengthOfArray(aTxt)-1] = aTxt[LengthOfArray(aTxt)-1] + ';';
+       fi;
+     fi;
+   end;
+   if (LengthOfArray(aTxt) <> 0) :
+     return СИС2.СтроковыеФункции.МассивСтрокВТекст(aTxt);
+   fi;
+end;
+
+func ПериодОпаты_Реестр : string;
+  return Период_С_По(Self.Record.ДатаНачалаОплаты,Self.Record.ДатаОкончанияОплаты);
+end;
+
+func РасчетныйПериод_Реестр : string;
+  Result = '';
+  if (Self.Record.ГодВРасчете1 <> 0) :
+    Result = 'с '+ Str(Self.Record.ГодВРасчете1) +'г.';
+  fi;
+  if (Self.Record.ГодВРасчете2 <> 0) :
+    Result = Result + ' по '+ Str(Self.Record.ГодВРасчете2) +'г.';
+  fi;
+end;
+
+func СреднийЗаработок_Реестр : string;
+ var i : integer;
+ var aTxt: string[];
+   Result = '';
+   aTxt  = nil;
+   i = 0;
+   if (Self.Record.СреднийЗаработок1 <> 0 or Self.Record.ГодВРасчете1 <> 0) :
+     i = i + 1;
+     aTxt[i] = Str(Self.Record.СреднийЗаработок1,2) +'р. за '+ Str(Self.Record.ГодВРасчете1) +'г.';
+   fi;
+   if (Self.Record.СреднийЗаработок2 <> 0 or Self.Record.ГодВРасчете2 <> 0) :
+     i = i + 1;
+     aTxt[i] = Str(Self.Record.СреднийЗаработок2,2) +'р. за '+ Str(Self.Record.ГодВРасчете2 <> 0) +'г.';
+   fi;
+   if (LengthOfArray(aTxt) = 1) :
+     return aTxt[1];
+   elsif (LengthOfArray(aTxt) = 2) :
+     return СИС2.СтроковыеФункции.МассивСтрокВТекст(aTxt);
+   fi;
+end;
+
 
 
 
@@ -191,6 +263,16 @@ func СтажСтрокойГоды(локЛет : integer) : string;
       ss = 'года';
     fi;
     Result = Result + ' ' + ss;
+end;
+
+func Период_С_По(локДата1 : date; локДата2 : date) : string;
+  Result = '';
+  if (локДата1 <> nil) :
+    Result = 'с '+ Str(локДата1);
+  fi;
+  if (локДата2 <> nil) :
+    Result = Result + ' по '+ Str(локДата2);
+  fi;
 end;
 
 
