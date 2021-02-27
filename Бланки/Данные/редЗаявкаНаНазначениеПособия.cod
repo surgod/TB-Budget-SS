@@ -132,23 +132,6 @@ end;
 
 
 proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
-  if (Cell.Contents = 'ПризнакЗавершения') :
-    if (Завершено) :
-      Cell.Color = clYellow;
-      return;
-    else
-      Cell.Color = clNoColor;
-      return;
-    fi;
-  elsif (Cell.Contents = 'НомерРеестра') :
-    if (ПозицияРеестра <> nil) :
-      Cell.Color = clYellow;
-      return;
-    else
-      Cell.Color = clNoColor;
-      return;
-    fi;
-  end;
   if (Cell.Style.Name = 'Поле ввода'):
     if Cell.Enabled: inherited ПриРисовании_КакПолеВвода (Cell, Selected, Color, FieldColor, Font);
     else             inherited ПриРисовании_КакЗапрещенное (Cell, Selected, Color, FieldColor, Font);
@@ -327,6 +310,7 @@ proc кнЗавершить_ПриНажатии (Sender: Button);
       Завершено = false;
     fi;
   fi;
+  МодифицироватьШаблонПоЗавершено;
 end;
 
 proc кнВРеестр_ПриНажатии (Sender: Button);
@@ -526,56 +510,34 @@ proc МодифицироватьФреймПолучатель;
   var locCol,i  : integer;
     локСекц = СекцияПоИмени('секцПолучатель',фреймПолучатель);
     locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_Получ').Number;
-    if (Завершено) :
-      for i = 1..локСекц.RowsCount do
+    for i = 1..локСекц.RowsCount do
+      if (локСекц.Row[i].Name = 'стрАдрес_Ред') :
+        локСекц.Row[i].Visible = not Завершено;
+      elsif (локСекц.Row[i].Name = 'стрАдрес_НеРед') :
+        локСекц.Row[i].Visible = Завершено;
+      else
         if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
-          локСекц.Cell[locCol,i].Enabled = false;
+          локСекц.Cell[locCol,i].Enabled = not Завершено;
         fi;
-        if (локСекц.Row[i].Name = 'стрАдрес_Ред') :
-          локСекц.Row[i].Visible = false;
-        fi;
-        if (локСекц.Row[i].Name = 'стрАдрес_НеРед') :
-          локСекц.Row[i].Visible = true;
-        fi;
-      end;
-    else
-      for i = 1..локСекц.RowsCount do
-        if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
-          локСекц.Cell[locCol,i].Enabled = true;
-        fi;
-        if (локСекц.Row[i].Name = 'стрАдрес_Ред') :
-          локСекц.Row[i].Visible = true;
-        fi;
-        if (локСекц.Row[i].Name = 'стрАдрес_НеРед') :
-          локСекц.Row[i].Visible = false;
-        fi;
-      end;
-    fi;
+      fi;
+    end;
 end;
 
 proc МодифицироватьФреймДокументыПолучателя;
   var локСекц : TemplateSection;
   var i  : integer;
     локСекц = СекцияПоИмени('секцДокПолучателя',фреймДокументыПолучателя);
-    if (Завершено) :
-      for i = 1..локСекц.RowsCount do
-        if (локСекц.Row[i].Name = 'стрУдЛичн_Ред') :
-          локСекц.Row[i].Visible = false;
-        fi;
-        if (локСекц.Row[i].Name = 'стрУдЛичн_НеРед') :
-          локСекц.Row[i].Visible = true;
-        fi;
-      end;
-    else
-      for i = 1..локСекц.RowsCount do
-        if (локСекц.Row[i].Name = 'стрУдЛичн_Ред') :
-          локСекц.Row[i].Visible = true;
-        fi;
-        if (локСекц.Row[i].Name = 'стрУдЛичн_НеРед') :
-          локСекц.Row[i].Visible = false;
-        fi;
-      end;
-    fi;
+    for i = 1..локСекц.RowsCount do
+      if (локСекц.Row[i].Name = 'стрУдЛичн_Ред') :
+        локСекц.Row[i].Visible = not Завершено;
+      elsif (локСекц.Row[i].Name = 'стрУдЛичн_НеРед') :
+        локСекц.Row[i].Visible = Завершено;
+      elsif (локСекц.Row[i].Name = 'стрДокПрож_Ред') :
+        локСекц.Row[i].Visible = not Завершено;
+      elsif (локСекц.Row[i].Name = 'стрДокПрож_НеРед') :
+        локСекц.Row[i].Visible = Завершено;
+      fi;
+    end;
 end;
 
 proc МодифицироватьФреймСведенияБЛ;
@@ -585,40 +547,35 @@ proc МодифицироватьФреймСведенияБЛ;
     Cell = фреймСведенияБЛ.CellByField['ФормаБЛ_Реестр'];
     локСекц =Cell.Owner;
     locCol = Cell.Column;
-    if (Завершено) :
-      for i = 1..локСекц.RowsCount do
-        if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
-          локСекц.Cell[locCol,i].Enabled = false;
-          локСекц.Cell[locCol,i].Button = false;
-        fi;
-      end;
-    else
-      for i = 1..локСекц.RowsCount do
-        if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
-          локСекц.Cell[locCol,i].Enabled = true;
-          локСекц.Cell[locCol,i].Button = true;
-        fi;
-      end;
-    fi;
+    for i = 1..локСекц.RowsCount do
+      if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+        локСекц.Cell[locCol,i].Enabled = not Завершено;
+        локСекц.Cell[locCol,i].Button = not Завершено;
+      fi;
+    end;
 end;
 
 proc МодифицироватьФреймРасчетБЛ;
+  var локСекц : TemplateSection;
+  var i,locCol  : integer;
+  var Cell : TemplateCell;
+    Cell = фреймРасчетБЛ.CellByField['Стаж_Реестр'];
+    локСекц =Cell.Owner;
+    locCol = Cell.Column;
+    for i = 1..локСекц.RowsCount do
+      if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+        локСекц.Cell[locCol,i].Enabled = not Завершено;
+        локСекц.Cell[locCol,i].Button = not Завершено;
+      fi;
+    end;
 end;
 
 proc МодифицироватьФреймВыплата;
-  if (Завершено) :
-    фреймВыплата.CellByField['СпособВыплаты'].Enabled = false;
-    фреймВыплата.CellByField['БанкНаим'].Enabled = false;
-    фреймВыплата.CellByField['СчетПолучателя'].Enabled = false;
-    фреймВыплата.CellByField['БИК'].Enabled = false;
-    фреймВыплата.CellByField['НомерКарты'].Enabled = false;
-  else
-    фреймВыплата.CellByField['СпособВыплаты'].Enabled = true;
-    фреймВыплата.CellByField['БанкНаим'].Enabled = true;
-    фреймВыплата.CellByField['СчетПолучателя'].Enabled = true;
-    фреймВыплата.CellByField['БИК'].Enabled = true;
-    фреймВыплата.CellByField['НомерКарты'].Enabled = true;
-  fi;
+  фреймВыплата.CellByField['СпособВыплаты'].Enabled = not Завершено;
+  фреймВыплата.CellByField['БанкНаим'].Enabled = not Завершено;
+  фреймВыплата.CellByField['СчетПолучателя'].Enabled = not Завершено;
+  фреймВыплата.CellByField['БИК'].Enabled = not Завершено;
+  фреймВыплата.CellByField['НомерКарты'].Enabled = not Завершено;
 end;
 
 proc КнопкиДопСервисНаЭкран;
@@ -644,13 +601,8 @@ proc ЗаголовкЗаявкиНаЭкран;
   var локСекц : TemplateSection;
     локСекц = СекцияПоИмени("секцЗаголовокЗаявки",фреймСодержание);
     ЗаполнитьЗаголовокЗаявки;
-    if (Завершено) :
-      локСекц.Row[1].Visible = false;
-      локСекц.Row[2].Visible = true;
-    else
-      локСекц.Row[1].Visible = true;
-      локСекц.Row[2].Visible = false;
-    fi;
+    локСекц.Row[1].Visible = not Завершено;
+    локСекц.Row[2].Visible = Завершено;
 end;
 
 proc ЗаполнитьЗаголовокЗаявки ;

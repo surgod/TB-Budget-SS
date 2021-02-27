@@ -144,7 +144,11 @@ func ПолеРедактораПриВыводе(локИмяПоля : string) : variant;
   elsif (локИмяПоля = 'РасчетныйПериод_Реестр') :
     return РасчетныйПериод_Реестр;
   elsif (локИмяПоля = 'СреднийЗаработок_Реестр') :
-    return РасчетныйПериод_Реестр;
+    return СреднийЗаработок_Реестр;
+  elsif (локИмяПоля = 'НеполнаяСтавка_Реестр') :
+    return НеполнаяСтавка_Реестр;
+  elsif (локИмяПоля = 'ИнаяИнформация_Реестр') :
+    return ИнаяИнформация_Реестр;
   fi;
 end;
 
@@ -204,13 +208,30 @@ func ПериодОпаты_Реестр : string;
 end;
 
 func РасчетныйПериод_Реестр : string;
-  Result = '';
-  if (Self.Record.ГодВРасчете1 <> 0) :
-    Result = 'с '+ Str(Self.Record.ГодВРасчете1) +'г.';
-  fi;
-  if (Self.Record.ГодВРасчете2 <> 0) :
-    Result = Result + ' по '+ Str(Self.Record.ГодВРасчете2) +'г.';
-  fi;
+ var i : integer;
+ var aTxt: string[];
+   Result = '';
+   aTxt  = nil;
+   i = 0;
+   if (Self.Record.ГодВРасчете1 <> 0) :
+     i = i + 1;
+     aTxt[i] = 'с ' + Str(Self.Record.ГодВРасчете1);
+     if (Self.Record.ДатаЗаявления1 <> nil) :
+       aTxt[i] = aTxt[i] + ' ( ' + Str(Self.Record.ДатаЗаявления1) + ')';
+     fi;
+   fi;
+   if (Self.Record.ГодВРасчете2 <> 0) :
+     i = i + 1;
+     aTxt[i] = 'по ' + Str(Self.Record.ГодВРасчете2);
+     if (Self.Record.ДатаЗаявления2 <> nil) :
+       aTxt[i] = aTxt[i] + ' ( ' + Str(Self.Record.ДатаЗаявления2) + ')';
+     fi;
+   fi;
+   if (LengthOfArray(aTxt) = 1) :
+     return aTxt[1];
+   elsif (LengthOfArray(aTxt) = 2) :
+     return СИС2.СтроковыеФункции.МассивСтрокВТекст(aTxt);
+   fi;
 end;
 
 func СреднийЗаработок_Реестр : string;
@@ -225,7 +246,7 @@ func СреднийЗаработок_Реестр : string;
    fi;
    if (Self.Record.СреднийЗаработок2 <> 0 or Self.Record.ГодВРасчете2 <> 0) :
      i = i + 1;
-     aTxt[i] = Str(Self.Record.СреднийЗаработок2,2) +'р. за '+ Str(Self.Record.ГодВРасчете2 <> 0) +'г.';
+     aTxt[i] = Str(Self.Record.СреднийЗаработок2,2) +'р. за '+ Str(Self.Record.ГодВРасчете2) +'г.';
    fi;
    if (LengthOfArray(aTxt) = 1) :
      return aTxt[1];
@@ -234,7 +255,16 @@ func СреднийЗаработок_Реестр : string;
    fi;
 end;
 
+func НеполнаяСтавка_Реестр : string;
+  Result = '';
+  if (Self.Record.НеполнаяСтавка <> 0) :
+    return Str(Self.Record.НеполнаяСтавка,2);
+  fi;
+end;
 
+func ИнаяИнформация_Реестр : string;
+  return Self.Record.ИнаяИнформация;
+end;
 
 
 func СтажСтрокой(локЛет : integer; локМесяцев : integer) : string;
