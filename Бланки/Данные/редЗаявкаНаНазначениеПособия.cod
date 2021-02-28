@@ -44,7 +44,7 @@ var СписокФреймов[] : variant;
   var кнВРеестр : Button;
 --иконки
 
-type типИконка = (iMenu=1);
+type типИконка = (iEdit=1,iReport,iMan,iDokMan,iInput,iCalc,iCalc_Disabled,iMoney);
 var ImageLibr: Image[]; -- локальная библиотека изображений
 
 
@@ -84,7 +84,8 @@ var ДатаРегистрацииВ_МСЭ : date;
 
 proc шаблон_ПриСоздании(Context :Variant);
   inherited шаблон_ПриСоздании(Context);
-  ЗагрузитьИконку(iMenu, 'edit.ico');
+  ЗагрузитьИконки;
+  ИнициализироватьИконки;
   ОбновитьСписокПоля(фреймВыплата.CellByField['СпособВыплаты'], ТипыСпособовВыплатыФЛ);
   ОбновитьСписокПоля(фреймОсновныеСведения.CellByField['ТипИнфо'], ТипыИнфо);
   ОбновитьСписокПоля(фреймОсновныеСведения.CellByField['ПричинаПерерасчета'], ТипыПричиныПерерасчета);
@@ -271,19 +272,23 @@ end;
 
 func ПолеРазделы_ПриНажатии(Cell:TemplateCell; Action : Template.ClickTypes) : Logical;
   var ii : integer;
+  var локСекц : TemplateSection;
+  var locCol  : integer;
     Result = false;
     ii = -1;
-    if (Cell.Contents = 'ОснСвед') :             --потом нужна будет другая проверка, по имени столбца или что-то в этом духе
+    локСекц = Cell.Owner;
+    locCol = Cell.Column;
+    if (локСекц.Column[locCol].Name = 'стб_РазделОснСвед') :
       ii = РазделОснСвед;
-    elsif (Cell.Contents = 'Получ') :
+    elsif (локСекц.Column[locCol].Name = 'стб_РазделПолуч') :
       ii = РазделПолуч;
-    elsif (Cell.Contents = 'ДокПолуч') :
+    elsif (локСекц.Column[locCol].Name = 'стб_РазделДокПолуч') :
       ii = РазделДокПолуч;
-    elsif (Cell.Contents = 'СведПос') :
+    elsif (локСекц.Column[locCol].Name = 'стб_РазделСведПос') :
       ii = РазделСвед;
-    elsif (Cell.Contents = 'РасчПос') :
+    elsif (локСекц.Column[locCol].Name = 'стб_РазделРасчПос') :
       ii = РазделРасч;
-    elsif (Cell.Contents = 'СведВыпл') :
+    elsif (локСекц.Column[locCol].Name = 'стб_РазделСведВыпл') :
       ii = РазделВыпл;
     fi;
     if (ii > 0) :
@@ -478,7 +483,7 @@ proc МодифицироватьШаблонПриСчитывании;
     фреймСоставФормы.ShowTabs = false;
     ЗаголовкЗаявкиНаЭкран;
     КнопкиДопСервисНаЭкран;
-    --УстановитьКнопкиРазделов;
+    МодифицироватьКнопкиРазделов;
   Template.EndModify;
 end;
 
@@ -492,6 +497,7 @@ end;
 
 
 proc МодифицироватьФреймыПоЗавершено;
+  МодифицироватьФреймОсновныеСведения;
   МодифицироватьФреймПолучатель;
   МодифицироватьФреймДокументыПолучателя;
   if (СписокФреймов[РазделСвед] = фреймСведенияБЛ) :
@@ -501,6 +507,18 @@ proc МодифицироватьФреймыПоЗавершено;
     МодифицироватьфреймРасчетБЛ;
   fi;
   МодифицироватьФреймВыплата;
+end;
+
+proc МодифицироватьФреймОсновныеСведения;
+  var локСекц : TemplateSection;
+  var locCol,i  : integer;
+    локСекц = СекцияПоИмени('секцОснСвед',фреймОсновныеСведения);
+    locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_ОснСвед').Number;
+    for i = 1..локСекц.RowsCount do
+      if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+        локСекц.Cell[locCol,i].Enabled = not Завершено;
+      fi;
+    end;
 end;
 
 
@@ -543,12 +561,10 @@ end;
 proc МодифицироватьФреймСведенияБЛ;
   var локСекц : TemplateSection;
   var i,locCol  : integer;
-  var Cell : TemplateCell;
-    Cell = фреймСведенияБЛ.CellByField['ФормаБЛ_Реестр'];
-    локСекц =Cell.Owner;
-    locCol = Cell.Column;
+    локСекц = СекцияПоИмени('секцСведенияБЛ',фреймСведенияБЛ);
+    locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_СведБЛ').Number;
     for i = 1..локСекц.RowsCount do
-      if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+      if (локСекц.Cell[locCol,i].CellType = Template.CalcFieldCell) :
         локСекц.Cell[locCol,i].Enabled = not Завершено;
         локСекц.Cell[locCol,i].Button = not Завершено;
       fi;
@@ -559,11 +575,10 @@ proc МодифицироватьФреймРасчетБЛ;
   var локСекц : TemplateSection;
   var i,locCol  : integer;
   var Cell : TemplateCell;
-    Cell = фреймРасчетБЛ.CellByField['Стаж_Реестр'];
-    локСекц =Cell.Owner;
-    locCol = Cell.Column;
+    локСекц = СекцияПоИмени('секцРасчБЛ',фреймРасчетБЛ);
+    locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_РасчБЛ').Number;
     for i = 1..локСекц.RowsCount do
-      if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
+      if (локСекц.Cell[locCol,i].CellType = Template.CalcFieldCell) :
         локСекц.Cell[locCol,i].Enabled = not Завершено;
         локСекц.Cell[locCol,i].Button = not Завершено;
       fi;
@@ -597,6 +612,22 @@ proc КнопкиДопСервисНаЭкран;
   fi;
 end;
 
+proc МодифицироватьКнопкиРазделов;
+  var локСекц : TemplateSection;
+  var locCol[],i,j : integer;
+    локСекц = СекцияПоИмени("секцРазделы",фреймСодержание);
+    locCol = НомераСтолбцовПоИменам(локСекц,['стб_РазделРасчПос','стб_РазделРасчНет']);
+    i = locCol[1];
+    j = locCol[2];
+    if (СписокФреймов[РазделРасч] = nil) :
+      локСекц.Column[i].Visible = false;
+      локСекц.Column[j].Visible = true;
+    else
+      локСекц.Column[i].Visible = true;
+      локСекц.Column[j].Visible = false;
+    fi;
+end;
+
 proc ЗаголовкЗаявкиНаЭкран;
   var локСекц : TemplateSection;
     локСекц = СекцияПоИмени("секцЗаголовокЗаявки",фреймСодержание);
@@ -624,10 +655,73 @@ end;
 
 --{{ Вспомогательные методы для работы с иконкой операции
 
-  proc ЗагрузитьИконку (iIco: типИконка; locPath: string);
-    ImageLibr[iIco] = Image.Create;
-    ImageLibr[iIco].LoadFromFile('%Projects%\ТББ_Базовый\Приложения\Иконки\32\' + locPath);
+  proc ЗагрузитьИконки ;
+    ImageLibr[iEdit] = Image.Create;
+    ImageLibr[iEdit].LoadFromFile('%Projects%\ТББ_Базовый\Приложения\Иконки\32\edit.ico');
+    ImageLibr[iReport] = Image.Create;
+    ImageLibr[iReport].LoadFromFile('%Projects%\ТББ_Базовый\Приложения\Иконки\32\information.ico');
+    ImageLibr[iMan] = Image.Create;
+    ImageLibr[iMan].LoadFromFile('%Projects%\ТББ_Базовый\Приложения\Иконки\Бизнесмен.ico');
+    ImageLibr[iDokMan] = Image.Create;
+    ImageLibr[iDokMan].LoadFromFile('%Projects%\ТББ_Базовый\Приложения\Иконки\Книги.ico');
+    ImageLibr[iInput] = Image.Create;
+    ImageLibr[iInput].LoadFromFile('%Projects%\ТББ_Базовый\Приложения\Иконки\Справка.ico');
+    ImageLibr[iCalc] = Image.Create;
+    ImageLibr[iCalc].LoadFromFile('%Projects%\Бюджет_ЗПиДД\Приложения\Иконки\32\calc.ico');
+    ImageLibr[iCalc_Disabled] = Image.Create;
+    ImageLibr[iCalc_Disabled].LoadFromFile('%Projects%\Бюджет_ЗПиДД\Приложения\Иконки\32\calc_disabled.ico');
+    ImageLibr[iMoney] = Image.Create;
+    ImageLibr[iMoney].LoadFromFile('%Projects%\Бюджет_ЗПиДД\Приложения\Иконки\Выплаты.ico');
   end;
+
+ proc ИнициализироватьИконки;
+   ИнициализироватьИконкиПолучатель;
+   ИнициализироватьИконкиДокументыПолучателя;
+   ИнициализироватьИконкиРазделов;
+ end;
+
+ proc ИнициализироватьИконкиПолучатель;
+  var локСекц : TemplateSection;
+  var locCol,locRow : integer;
+    локСекц = СекцияПоИмени("секцПолучатель",фреймПолучатель);
+    locRow = СтрокаСекцииПоИмени(локСекц,'стрАдрес_Ред').Number;
+    locCol = СтолбецСекцииПоИмени(локСекц,'стб_ПолучМеню').Number;
+    ИнициализироватьИконку_Клетки(iEdit,локСекц,locCol,locRow);
+ end;
+
+ proc ИнициализироватьИконкиДокументыПолучателя;
+  var локСекц : TemplateSection;
+  var locCol,locRow[] : integer;
+    локСекц = СекцияПоИмени("секцДокПолучателя",фреймДокументыПолучателя);
+    locCol = СтолбецСекцииПоИмени(локСекц,'стб_ДокПолучМеню').Number;
+    locRow = НомераСтрокПоИменам(локСекц,['стрУдЛичн_Ред','стрДокПрож_Ред']);
+    ИнициализироватьИконку_Клетки(iEdit,локСекц,locCol,locRow[1]);
+    ИнициализироватьИконку_Клетки(iEdit,локСекц,locCol,locRow[2]);
+ end;
+
+ proc ИнициализироватьИконкиРазделов;
+  var локСекц : TemplateSection;
+  var i,locRow : integer;
+    локСекц = СекцияПоИмени("секцРазделы",фреймСодержание);
+    locRow = СтрокаСекцииПоИмени(локСекц,'стр_Разделы').Number;
+    for i = 1..локСекц.ColumnsCount do
+      if (локСекц.Column[i].Name = 'стб_РазделОснСвед') :
+        ИнициализироватьИконку_Клетки(iReport,локСекц,i,locRow);
+      elsif (локСекц.Column[i].Name = 'стб_РазделПолуч') :
+        ИнициализироватьИконку_Клетки(iMan,локСекц,i,locRow);
+      elsif (локСекц.Column[i].Name = 'стб_РазделДокПолуч') :
+        ИнициализироватьИконку_Клетки(iDokMan,локСекц,i,locRow);
+      elsif (локСекц.Column[i].Name = 'стб_РазделСведПос') :
+        ИнициализироватьИконку_Клетки(iInput,локСекц,i,locRow);
+      elsif (локСекц.Column[i].Name = 'стб_РазделРасчПос') :
+        ИнициализироватьИконку_Клетки(iCalc,локСекц,i,locRow);
+      elsif (локСекц.Column[i].Name = 'стб_РазделРасчНет') :
+        ИнициализироватьИконку_Клетки(iCalc_Disabled,локСекц,i,locRow);
+      elsif (локСекц.Column[i].Name = 'стб_РазделСведВыпл') :
+        ИнициализироватьИконку_Клетки(iMoney,локСекц,i,locRow);
+      fi;
+    end;
+ end;
 
  proc ИнициализироватьИконку_Клетки (iIco: типИконка; locSect  : TemplateSection;
                                       locCol : integer; locRow : integer);
