@@ -148,8 +148,14 @@ func ОсновныеСведения_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Tem
   Result = '';
   if (Cell.Contents = 'ИмяТипаПособия' ) :
     return  ИмяТипаПособия(ТипПособия);
+  elsif (Cell.Contents = 'ИмяТипаПособияДоп' ) :
+    return  ИмяТипаПособия(ТипПособияДоп);
   elsif (Cell.Contents = 'ИмяТипаРеестра'  ) :
     return  ПолноеИмяТипаРеестра(ТипРеестра);
+  elsif (Cell.Contents = 'ВидСО_Доп'  ) :
+    if (НазначениеПособияДоп <> nil) :
+      return  НазначениеПособияДоп.ВидСтраховогоОбеспечения.Наим;
+    fi;
   fi;
 end;
 
@@ -252,7 +258,7 @@ func ПолеВыплата_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template.
   var locForm: BlankForm;
   var локСтрока : string;
   Result = false;
-  if (Cell.Contents = 'Открыть') :
+  if (Cell.Contents = 'СчетПолучателя') :
     локСтрока = СчетПолучателя;
     if ( cmOk = ТББ_Базовый.Библио.ВводНомераБанкСчета(локСтрока)) :
       СчетПолучателя = локСтрока;
@@ -574,7 +580,6 @@ end;
 proc МодифицироватьФреймРасчетБЛ;
   var локСекц : TemplateSection;
   var i,locCol  : integer;
-  var Cell : TemplateCell;
     локСекц = СекцияПоИмени('секцРасчБЛ',фреймРасчетБЛ);
     locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_РасчБЛ').Number;
     for i = 1..локСекц.RowsCount do
@@ -741,7 +746,7 @@ func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Acti
   var aTxt: string[];
   with СИС2.СтроковыеФункции  do
     aTxt[1] = MarkInGray(НашеУчреждение.Наим);
-    aTxt[2] = 'Заявка на назначение '+ ИмяПособияРод(ТипПособия)+' ';
+    aTxt[2] = 'Заявка на назначение '+ ИмяПособияРод(ТипПособия,ТипПособияДоп)+' ';
     --aTxt[3] = MarkInGray('Номер '+ НомерБум);
     aTxt[3] = MarkInGray(Сотрудник.Имя);
     Return МассивСтрокВТекст(aTxt);

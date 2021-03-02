@@ -6,12 +6,13 @@ ActionOnType=2
 CanHGroupModify=0
 CanCopy=1
 OnRearrange=картотека_ПриОформлении
-ColumnCount=5
+ColumnCount=6
 Column:0=ДатаРасчета
 Column:1=ДатаПереРасчета
-Column:2=ДатаНачала
-Column:3=ДатаОкончания
-Column:4=ВидСтраховогоОбеспечения.Имя
+Column:2=ТипПособия
+Column:3=ДатаНачала
+Column:4=ДатаОкончания
+Column:5=ВидСтраховогоОбеспечения.Имя
 TreeWidth=1
 SubTableWidth=0
 SubTableHeight=0
@@ -24,6 +25,12 @@ Width=100
 [.Column.ДатаПереРасчета]
 Caption=Дата перерасчета/доначисления пособия
 Width=100
+
+[.Column.ТипПособия]
+Caption=Тип пособия
+Width=100
+ColumnType=1
+OnOutput=КартПоле_ПриВыводе
 
 [.Column.ДатаНачала]
 Caption=Дата начала страхового случая

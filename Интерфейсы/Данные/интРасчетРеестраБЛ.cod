@@ -156,11 +156,19 @@ end;
 inobject private
 
 func Стаж_Реестр : string;
-  Result = 'Стаж '+ СтажСтрокой(Self.Record.СтаховойСтажЛет,Self.Record.СтаховойСтажМес);
-  if (Self.Record.НестраховойПериодЛет <> 0 or Self.Record.НестраховойПериодМес <> 0) :
-    Result =  Result + ' / в т.ч. нестрах.периоды ' +
-              СтажСтрокой(Self.Record.НестраховойПериодЛет,Self.Record.НестраховойПериодМес);
-  fi;
+  var ss1,ss2 : string;
+    Result = '';
+    ss1 = СтажСтрокой(Self.Record.СтаховойСтажЛет,Self.Record.СтаховойСтажМес);
+    ss2 = '';
+    if (Self.Record.НестраховойПериодЛет <> 0 or Self.Record.НестраховойПериодМес <> 0) :
+      ss2 = СтажСтрокой(Self.Record.НестраховойПериодЛет,Self.Record.НестраховойПериодМес);
+    fi;
+    if (ss1 <> '') :
+      Result = 'Стаж '+ ss1;
+    fi;
+    if (ss2 <> '') :
+      Result = ' / в т.ч. нестрах.периоды '+ ss2;
+    fi;
 end;
 
 func ТрудДогДо_6_Месяцев_Реестр : string;
