@@ -275,6 +275,7 @@ func ИнаяИнформация_Реестр : string;
 end;
 
 
+
 func СтажСтрокой(локЛет : integer; локМесяцев : integer) : string;
   var ss : string;
     Result = '';
@@ -302,6 +303,7 @@ func СтажСтрокойГоды(локЛет : integer) : string;
     fi;
     Result = Result + ' ' + ss;
 end;
+
 
 func Период_С_По(локДата1 : date; локДата2 : date) : string;
   Result = '';

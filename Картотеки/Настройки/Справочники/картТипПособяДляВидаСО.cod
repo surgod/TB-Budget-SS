@@ -1,0 +1,41 @@
+class inherited СИС2.КартБазовая "Настройка типов пособий соц.страх. для видов страх.обеспечения";
+
+import classes Константы,ФункцииПримененияКостант;
+
+inclass private
+
+  var ЭкспортВПроект: logical := true;
+
+inobject private
+
+var КодыСО[] : string;
+var ВидыСО[] : Бюджет_ЗПиДД.Справочники.ВидыСтраховогоОбеспечения ;
+
+func КартПоле_ПриВыводе (Column: CardfileColumn; Rec: Настройки.Справочники.ТипПособияДляВидаСО; Action: Template.OutputTypes; var Format: String): Variant;
+  var локТипПособия : integer;
+    Result = '';
+    локТипПособия = Rec.ТипПособияСоцСтрах;
+    Result = ИмяТипаПособия(локТипПособия);
+end;
+
+func КартВидСО_ПриВыводе (Column: CardfileColumn; Rec: Настройки.Справочники.ТипПособияДляВидаСО; Action: Template.OutputTypes; var Format: String): Variant;
+  var ii : integer;
+    Result = '';
+    ii = SearchInArray(КодыСО,Rec.Код);
+    if (ii > 0) :
+      Result = ВидыСО[ii].Наим;
+    fi;
+end;
+
+
+
+  proc шаблон_ПриСоздании (Context: Variant);
+    var локКодыСО[] : string;
+    var локВидыСО[] : Бюджет_ЗПиДД.Справочники.ВидыСтраховогоОбеспечения;
+    inherited шаблон_ПриСоздании(Context);
+    КодыИВидыСО (локКодыСО,локВидыСО);
+    КодыСО = локКодыСО;
+    ВидыСО = локВидыСО;
+  end;
+
+end
