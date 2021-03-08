@@ -9,6 +9,29 @@ inclass private
   var КлассИнтерфейса: Class МашинаРеквизитов.Базовые.интЗапись = Данные.интЗаявкаНаНазначениеПособия;
 --}}
 
+inclass public
+
+func ВыполнитьВыбор (var локРезультатВыбора: Данные.ЗаявкаНаНазначениеПособия;
+                     локДопустимыеЗаявки[] : Данные.ЗаявкаНаНазначениеПособия) : integer;
+  var locCrd: Данные.картЗаявкаНаНазначениеПособия;
+  var locResult: Данные.ЗаявкаНаНазначениеПособия;
+  var locId[],i : integer;
+    if (LengthOfArray(локДопустимыеЗаявки)=1) :
+      локРезультатВыбора = локДопустимыеЗаявки[1];
+      Return CmOk;
+    end;
+    locId = nil;
+    for i = 1..LengthOfArray(локДопустимыеЗаявки) do
+      locId[i] = локДопустимыеЗаявки[i].DocId;
+    end;
+    locCrd = Данные.картЗаявкаНаНазначениеПособия.Create;
+    locCrd.CardFile.UserFilter = 'DocId in ' + Str(locId);
+    if (CmOk = locCrd.ShowEx(locResult, , Kernel.Window.ModalWindow)):
+      локРезультатВыбора = locResult;
+      Return CmOk;
+    fi;
+end;
+
 
 --------------------------------------------------------------------------------
 --{ Обработчики событий картотеки
