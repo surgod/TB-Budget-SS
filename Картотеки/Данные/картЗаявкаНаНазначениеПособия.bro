@@ -24,21 +24,23 @@ SubTableHeight=0
 SubTableAlign=0
 
 [.Column.НашеУчреждение.Имя]
-Caption=Наименование
-Width=100
+Caption=Учреждение
+Width=0
 
 [.Column.Сотрудник.Имя]
-Caption=Наименование
-Width=100
+Caption=Сотрудник
+Width=0
 
 [.Column.НомерБум]
-Caption=Номер, на бумажном документе
+Caption=Номер документа
 Width=100
+Alignment=2
 
 [.Column.Дата]
 Caption=Дата документа
 Width=100
+Alignment=2
 
 [.Column.НазначениеПособия.ВидСтраховогоОбеспечения.Имя]
-Caption=Наименование
-Width=308
+Caption=Вид пособия
+Width=0

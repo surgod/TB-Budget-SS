@@ -2,3 +2,7 @@
 <Properties Version="1">
   <Property Name="Title" Value="Настройка справочников"/>
 </Properties>
+<Items>
+  <Item Name="ТипПособияДляВидаСО"/>
+  <Item Name="РасчетыС_ФСС"/>
+</Items>

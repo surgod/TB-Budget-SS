@@ -2,3 +2,8 @@
 <Properties Version="1">
   <Property Name="Title" Value="интерфейсы справочников"/>
 </Properties>
+<Items>
+  <Item Name="интАдресСоцСтрах"/>
+  <Item Name="интУдостоверениеСоцСтрах"/>
+  <Item Name="интТипПособияДляВидаСО"/>
+</Items>

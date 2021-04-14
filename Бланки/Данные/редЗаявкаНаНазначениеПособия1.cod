@@ -1,0 +1,775 @@
+class inherited “ЅЅ_Ѕазовый.Ѕазовые.ЅазовыйЅланкƒокумент "«а€вка на назначение и оплату пособи€", editor ƒанные.«а€вкаЌаЌазначениеѕособи€;
+
+import classes  онстанты,‘ункцииѕрименени€ остант;--,‘ункцииƒанных;
+import —»—2 classes  онстанты;
+import Ѕазовый classes  онстанты;
+
+--{{ —войства
+
+inobject public
+
+  var »нтерфейс: ƒанные.инт«а€вкаЌаЌазначениеѕособи€;
+--}}
+
+
+inobject private
+
+--type “ипыћодификацииЎаблона  = (“ипћЎ_—чит = 0, “ипћЎа_«авершение, “ипћЎ_–аздел) ; --“ипћЎ_–ед—в€занные«аписи);
+
+  type –азделы‘ормы = (–азделќсн—вед = 1, –азделѕолуч, –азделƒокѕолуч,–аздел—вед, –аздел–асч, –аздел¬ыпл);
+
+
+  var јктивный–аздел : integer;
+  var —писок‘реймов[] : variant;
+
+  --фреймы
+
+
+  var фрейм—остав‘ормы :TemplateFrame;
+  var фрейм—одержание :TemplateFrame;
+  var фреймќсновные—ведени€ :TemplateFrame;
+  var фреймѕолучатель :TemplateFrame;
+  var фреймƒокументыѕолучател€ :TemplateFrame;
+  var фрейм—ведени€ЅЋ :TemplateFrame;
+  var фрейм–асчетЅЋ :TemplateFrame;
+  var фрейм¬ыплата :TemplateFrame;
+
+  --кнопки
+
+  var кн«авершить : Button;
+  var кн¬–еестр : Button;
+--иконки
+
+type тип»конка = (iEdit=1,iReport,iMan,iDokMan,iInput,iCalc,iCalc_Disabled,iMoney);
+var ImageLibr: Image[]; -- локальна€ библиотека изображений
+
+
+--сведени€ о за€вке
+
+var ѕризнак«авершени€ : string = if («авершено : '«а€вка завершена',  '');
+var Ќомер–еестра : string = if(ѕозици€–еестра <> nil : Str(ѕозици€–еестра.–еестр.Ќомер«аƒень), '');
+var ¬ид—ќ : Ѕюджет_«ѕиƒƒ.—правочники.¬иды—траховогоќбеспечени€;
+
+var ѕозици€–еестра : ƒокументы.‘——.ѕозици€–еестра;  --определ€етс€ при считывании
+var «аголовок«а€вки : string;
+
+--интерфейсф св€занных записей
+
+var »нтјдрес–егистрации :  —правочники.интјдрес—оц—трах;
+var »нтјдресѕроживани€ :  —правочники.интјдрес—оц—трах;
+var »нт”достоверениеЋичности :  —правочники.инт”достоверение—оц—трах;
+var »нтƒокументќѕроживании :  —правочники.инт”достоверение—оц—трах;
+
+var »нт—ведени€ : variant;
+var »нт–асчет : variant;
+
+--пол€ дл€ редактироавни€ сведений дл€ назначени€ пособи€
+
+var “ип‘ормыЅЋ : integer;
+var ƒатаЅЋ : date;
+var ƒата—тационар1ЅЋ : date;
+var ƒата—тационар2ЅЋ : date;
+var ƒатаЌачалаЅЋ : date;
+var ƒатаќкончани€ЅЋ : date;
+var ƒата¬ыходаЌа–аботу : date;
+var ƒата–егистрации¬_ћ—Ё : date;
+
+
+--------------------------------------------------------------------------------
+--{ ќбработчики событий бланка
+
+proc шаблон_ѕри—оздании(Context :Variant);
+  inherited шаблон_ѕри—оздании(Context);
+  «агрузить»конки;
+  »нициализировать»конки;
+  ќбновить—писокѕол€(фрейм¬ыплата.CellByField['—пособ¬ыплаты'], “ипы—пособов¬ыплаты‘Ћ);
+  ќбновить—писокѕол€(фреймќсновные—ведени€.CellByField['“ип»нфо'], “ипы»нфо);
+  ќбновить—писокѕол€(фреймќсновные—ведени€.CellByField['ѕричинаѕерерасчета'], “ипыѕричиныѕерерасчета);
+end;
+
+
+proc шаблон_ѕри—читывании;
+  inherited шаблон_ѕри—читывании;
+  ѕрочитатьѕозицию–еестра;
+  ¬ид—ќ = Ќазначениеѕособи€.¬ид—траховогоќбеспечени€;
+  if (»нтерфейс <> nil) :
+    »нтерфейс.Record = Self.Record;
+  fi;
+  if (Self.Record.State = Record.Created) :
+    EditorPost;
+    »нтерфейс.—оздать—в€занные«аписи;
+  fi;
+  ”становить»нтерфейсы—в€занных«аписей;
+  —оставить—писок‘реймов;
+  ћодифицироватьЎаблонѕри—читывании;
+  јктивный–аздел = –азделќсн—вед;
+  ¬ид‘ормы;
+end;
+
+func шаблон_ѕри«аписи : logical;
+  Result = true;
+  if (»нт—ведени€ <> nil) :
+    »нт—ведени€.Record.Edit;
+    if (»нт—ведени€.Record.Modified) :
+      »нт—ведени€.Record.Post;
+    fi;
+  fi;
+end;
+
+func шаблон_ѕриќтмене : logical;
+  Result = true;
+  if (»нт—ведени€ <> nil) :
+    if (»нт—ведени€.Record.Modified) :
+      »нт—ведени€.Record.Cancel;
+      »нт—ведени€.Record.Edit;
+    fi;
+  fi;
+end;
+
+
+
+proc ѕоле_ѕри–исовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+  if (Cell.Style.Name = 'ѕоле ввода'):
+    if Cell.Enabled: inherited ѕри–исовании_ акѕоле¬вода (Cell, Selected, Color, FieldColor, Font);
+    else             inherited ѕри–исовании_ ак«апрещенное (Cell, Selected, Color, FieldColor, Font);
+    fi;
+  elsif (Cell.Style.Name = 'ѕоле выбора'):
+    if Cell.Enabled: inherited ѕри–исовании_ акѕоле¬ыбора (Cell, Selected, Color, FieldColor, Font);
+    else             inherited ѕри–исовании_ ак«апрещенное (Cell, Selected, Color, FieldColor, Font);
+    fi;
+  fi;
+end;
+
+func ќсновные—ведени€_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = '';
+  if (Cell.Contents = '»м€“ипаѕособи€' ) :
+    return  »м€“ипаѕособи€(“ипѕособи€);
+  elsif (Cell.Contents = '»м€“ипаѕособи€ƒоп' ) :
+    return  »м€“ипаѕособи€(“ипѕособи€ƒоп);
+  elsif (Cell.Contents = '»м€“ипа–еестра'  ) :
+    return  ѕолное»м€“ипа–еестра(“ип–еестра);
+  elsif (Cell.Contents = '¬ид—ќ_ƒоп'  ) :
+    if (Ќазначениеѕособи€ƒоп <> nil) :
+      return  Ќазначениеѕособи€ƒоп.¬ид—траховогоќбеспечени€.Ќаим;
+    fi;
+  fi;
+end;
+
+proc ќсновные—ведени€_ѕри¬ыходе(Cell: TemplateCell; Index: Integer);
+  if (Cell.Contents = 'ЌомерЅум' ) :
+    «аполнить«аголовок«а€вки;
+    inherited ѕоле_ѕри¬ыходе(Cell,Index);
+  fi;
+end;
+
+func ѕолејдрес_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = '';
+  if (Cell.Contents = 'јдрес–ег_—трокой' ) :
+    if (»нтјдрес–егистрации <> nil) :
+      return  »нтјдрес–егистрации.јдрес—трокой;
+    fi;
+  elsif (Cell.Contents = 'јдресѕрож_—трокой'  ) :
+    if (»нтјдресѕроживани€ <> nil) :
+      return  »нтјдресѕроживани€.јдрес—трокой;
+    fi;
+  fi;
+end;
+
+func ѕолеƒокументыѕолучател€_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = nil;
+  if (Cell.Contents in ['—ери€_”дЋичн','Ќомер_”дЋичн','ƒата¬ыдачи_”дЋичн'] ) :
+    if (»нт”достоверениеЋичности <> nil) :
+      if (Cell.Contents = '—ери€_”дЋичн') :
+        return »нт”достоверениеЋичности.—ери€ƒокумента;
+      elsif (Cell.Contents = 'Ќомер_”дЋичн') :
+        return »нт”достоверениеЋичности.Ќомерƒокумента;
+      elsif (Cell.Contents = 'ƒата¬ыдачи_”дЋичн') :
+        return »нт”достоверениеЋичности.ƒата¬ыдачиƒокумента;
+      fi;
+    fi;
+  elsif (Cell.Contents in ['Ќаимƒок_ƒокѕрож','—ери€Ќомер_ƒокѕрож','ƒата¬ыдачи_ƒокѕрож'] ) :
+    if (»нтƒокументќѕроживании <> nil) :
+      if (Cell.Contents = 'Ќаимƒок_ƒокѕрож') :
+        return »нтƒокументќѕроживании.Ќаименованиеƒокумента;
+      elsif (Cell.Contents = '—ери€Ќомер_ƒокѕрож') :
+        return »нтƒокументќѕроживании.—ери€Ќомер_–еестр;
+      elsif (Cell.Contents = 'ƒата¬ыдачи_ƒокѕрож') :
+        return »нтƒокументќѕроживании.ƒата¬ыдачиƒокумента;
+      fi;
+    fi;
+  fi;
+end;
+
+func ѕолејдрес_ѕриЌажатии(Cell:TemplateCell; Action : Template.ClickTypes) : Logical;
+  Result = false;
+  ћенюјдреса;
+end;
+
+func ѕолеƒокументыѕолучател€_ѕриЌажатии(Cell:TemplateCell; Action : Template.ClickTypes) : Logical;
+  var locRow : integer;
+    Result = false;
+    locRow = Cell.Row;
+    if (Cell.Owner.Row[locRow].Name = 'стр”дЋичн_–ед') :
+      ќткрыть”достоверени€Ћичности;
+    elsif (Cell.Owner.Row[locRow].Name = 'стрƒокѕрож_–ед') :
+      ћенюƒокументаќѕроживании;
+    fi;
+end;
+
+func ѕоле—ведени€ЅЋ_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = '';
+  if (»нт—ведени€ <> nil) :
+    return »нт—ведени€.ѕоле–едактораѕри¬ыводе(Cell.Contents);
+  fi;
+end;
+
+func ѕоле—ведени€ЅЋ_ѕри¬ходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
+  Result = false;
+  if (»нт—ведени€ <> nil) :
+    EditorPost;
+    ƒанные.ред—ведени€–еестраЅЋ.ѕоказатьћодально(»нт—ведени€.Record,Cell.Contents,«авершено);
+  fi;
+end;
+
+func ѕоле–асчетЅЋ_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+  Result = '';
+  if (»нт–асчет <> nil) :
+    return »нт–асчет.ѕоле–едактораѕри¬ыводе(Cell.Contents);
+  fi;
+end;
+
+
+func ѕоле–асчетЅЋ_ѕри¬ходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
+  Result = false;
+  if (»нт–асчет <> nil) :
+    EditorPost;
+    ƒанные.ред–асчет–еестраЅЋ.ѕоказатьћодально(»нт–асчет.Record,Cell.Contents,«авершено);
+  fi;
+end;
+
+
+
+
+func ѕоле¬ыплата_ѕри¬ходе(Cell :TemplateCell; Index :Integer; Action : Template.EnterTypes) :Logical;
+  var locForm: BlankForm;
+  var лок—трока : string;
+  Result = false;
+  if (Cell.Contents = '—четѕолучател€') :
+    лок—трока = —четѕолучател€;
+    if ( cmOk = “ЅЅ_Ѕазовый.Ѕиблио.¬водЌомераЅанк—чета(лок—трока)) :
+      —четѕолучател€ = лок—трока;
+    fi;
+  elsif (Cell.Contents = 'Ѕ» ') :
+    лок—трока = Ѕ» ;
+    if ( cmOk = “ЅЅ_Ѕазовый.Ѕиблио.¬водЌомераЅик(лок—трока)) :
+      Ѕ»  = лок—трока;
+    fi;
+  elsif (Cell.Contents = 'Ќомер арты') :
+    locForm = Ѕюджет_«ѕиƒƒ.—лужебные.бл¬водЌомераЅанк арты.CreateEx(Ќомер арты);
+    if (cmOk = locForm.ShowEx( ,Window.ModalWindow)):
+      Ќомер арты = locForm.ЌомерЅанк арты as String;
+    fi;
+  fi;
+end;
+
+func ѕоле–азделы_ѕриЌажатии(Cell:TemplateCell; Action : Template.ClickTypes) : Logical;
+  var ii : integer;
+  var лок—екц : TemplateSection;
+  var locCol  : integer;
+    Result = false;
+    ii = -1;
+    лок—екц = Cell.Owner;
+    locCol = Cell.Column;
+    if (лок—екц.Column[locCol].Name = 'стб_–азделќсн—вед') :
+      ii = –азделќсн—вед;
+    elsif (лок—екц.Column[locCol].Name = 'стб_–азделѕолуч') :
+      ii = –азделѕолуч;
+    elsif (лок—екц.Column[locCol].Name = 'стб_–азделƒокѕолуч') :
+      ii = –азделƒокѕолуч;
+    elsif (лок—екц.Column[locCol].Name = 'стб_–аздел—ведѕос') :
+      ii = –аздел—вед;
+    elsif (лок—екц.Column[locCol].Name = 'стб_–аздел–асчѕос') :
+      ii = –аздел–асч;
+    elsif (лок—екц.Column[locCol].Name = 'стб_–аздел—вед¬ыпл') :
+      ii = –аздел¬ыпл;
+    fi;
+    if (ii > 0) :
+      if (—писок‘реймов[ii] <> nil) :
+        јктивный–аздел = ii;
+        ¬ид‘ормы;
+      fi;
+    fi;
+end;
+
+
+
+proc кн«авершить_ѕриЌажатии (Sender: Button);
+  var Note : string;
+  if (кн«авершить.Caption = '«авершить') :
+    --нужна проверка
+     «авершено = true;
+  else
+    if (ѕозици€–еестра <> nil) :
+      Note = 'Ќельз€ сн€ть с за€вки признак завершени€, так как она включена в реестр';
+      Message(Note);
+      return;
+    else
+      «авершено = false;
+    fi;
+  fi;
+  ћодифицироватьЎаблонѕо«авершено;
+end;
+
+proc кн¬–еестр_ѕриЌажатии (Sender: Button);
+end;
+
+
+
+--}
+
+--{{ ¬спомогательные методы
+
+proc ѕрочитатьѕозицию–еестра;
+  ѕозици€–еестра = »нтерфейс.Ќайтиѕозицию–еестра;
+end;
+
+proc ”становить»нтерфейсы—в€занных«аписей;
+  »нтјдрес–егистрации = —правочники.интјдрес—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,тапѕрописка);
+  »нтјдресѕроживани€ = —правочники.интјдрес—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,тап‘актический);
+  »нт”достоверениеЋичности = —правочники.инт”достоверение—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,“ипƒокѕолуч”дЋичности);
+  »нтƒокументќѕроживании = —правочники.инт”достоверение—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,“ипƒокѕолучѕроживание);
+  »нт—ведени€ = nil;
+  »нт–асчет = nil;
+  if (Self.Record.“ип–еестра = “ип–еестраЌѕ_ЅЋ) :
+    »нт—ведени€ = ƒанные.инт—ведени€–еестраЅЋ.ќткрытьѕо«а€вке(Self.Record);
+    »нт–асчет = ƒанные.инт–асчет–еестраЅЋ.ќткрытьѕо«а€вке(Self.Record);
+  fi;
+end;
+
+proc —оставить—писок‘реймов;
+  —писок‘реймов = nil;
+  —писок‘реймов[–азделќсн—вед] = фреймќсновные—ведени€;
+  —писок‘реймов[–азделѕолуч] = фреймѕолучатель;
+  —писок‘реймов[–азделƒокѕолуч] = фреймƒокументыѕолучател€;
+  if (Self.Record.“ип–еестра = “ип–еестраЌѕ_ЅЋ) :    --!!!фреймы
+    if (Self.Record.“ипѕособи€ = “ипѕособи€–ан—рок) :
+       --—писок‘реймов[–аздел—вед] = фрейм—ведени€–ан—роки;
+      —писок‘реймов[–аздел–асч] = nil;
+    else
+      —писок‘реймов[–аздел—вед] = фрейм—ведени€ЅЋ;
+      —писок‘реймов[–аздел–асч] = фрейм–асчетЅЋ;
+    fi;
+  fi;
+  —писок‘реймов[–аздел¬ыпл] = фрейм¬ыплата;
+end;
+
+
+proc «агрузитьѕол€—ведений;
+  if (Self.Record.“ип–еестра = “ип–еестраЌѕ_ЅЋ) :
+    »нт—ведени€.«агрузитьѕол€¬–едактор«а€вки(Self);
+  fi;
+end;
+
+
+
+proc ћенюјдреса;
+  var locValuePosition: variant[];
+  var p: integer;
+  var лок»нт : —правочники.интјдрес—оц—трах;
+  var локјдрес : Ѕазовый.—правочники.јдрес;
+    locValuePosition[1] = 'ќткрыть адрес регистрации';
+    locValuePosition[2] = 'ќткрыть адрес проживани€';
+    if (»нтјдресѕроживани€ <> nil) :
+      locValuePosition[3] = '”далить адрес проживани€';
+    elsif (»нтјдрес–егистрации <> nil and »нтјдресѕроживани€ = nil) :
+      locValuePosition[3] = ' опировать адрес регистрации в адрес проживани€';
+    fi;
+    p = PopupMenu(locValuePosition);
+    if (p = 1):
+      лок»нт = »нтјдрес–егистрации;
+      –едактироватьјдрес(лок»нт,тапѕрописка);
+      »нтјдрес–егистрации = лок»нт;
+    elsif (p = 2):
+      лок»нт = »нтјдресѕроживани€;
+      –едактироватьјдрес(лок»нт,тап‘актический);
+      »нтјдресѕроживани€ = лок»нт;
+    elsif (p = 3):
+      if (locValuePosition[3] = '”далить адрес проживани€') :
+        локјдрес = »нтјдресѕроживани€.Record;
+        »нтјдресѕроживани€ = nil;
+        локјдрес.Delete;
+      elsif (locValuePosition[3] = ' опировать адрес регистрации в адрес проживани€') :
+        локјдрес = »нтјдрес–егистрации.Record;
+        лок»нт = —правочники.интјдрес—оц—трах.—оздать опиюƒл€«а€вки»“ипа(локјдрес,Self.Record,тап‘актический);
+        лок»нт.Record.Post;
+        »нтјдресѕроживани€ = лок»нт;
+      fi;
+    fi;
+end;
+
+proc –едактироватьјдрес(var лок»нт : —правочники.интјдрес—оц—трах; лок“ипјдреса : integer);
+  var локјдрес : Ѕазовый.—правочники.јдрес;
+    if (лок»нт = nil) :
+      лок»нт = —правочники.интјдрес—оц—трах.—оздатьѕо«а€вке»“ипу(Self.Record,лок“ипјдреса);
+    fi;
+    локјдрес = лок»нт.Record;
+    —правочники.интјдрес—оц—трах.Ѕланк–едакторѕо”молчанию.ShowFormEx(локјдрес , Kernel.Window.ModalWindow);
+    локјдрес = —правочники.интјдрес—оц—трах.Ќайтијдресѕо«а€вке»“ипу(Self.Record,лок“ипјдреса);
+    if (локјдрес = nil) :
+      лок»нт = nil;
+    else
+      лок»нт.Record = локјдрес;
+    fi;
+end;
+
+proc ќткрыть”достоверени€Ћичности;
+  var лок»нт : —правочники.инт”достоверение—оц—трах;
+     лок»нт = »нт”достоверениеЋичности;
+     –едактироватьƒокѕолучател€(лок»нт,“ипƒокѕолуч”дЋичности);
+     »нт”достоверениеЋичности = лок»нт;
+end;
+
+proc ћенюƒокументаќѕроживании;
+  var locValuePosition: variant[];
+  var p: integer;
+  var лок»нт : —правочники.инт”достоверение—оц—трах;
+  var локƒокумент : Ѕазовый.—правочники.”достоверение;
+    if (»нтƒокументќѕроживании = nil) :
+      лок»нт = »нтƒокументќѕроживании;
+      –едактироватьƒокѕолучател€(лок»нт,“ипƒокѕолучѕроживание);
+      »нтƒокументќѕроживании = лок»нт;
+    else
+      locValuePosition[1] = 'ќткрыть документ';
+      locValuePosition[2] = '”далить документ';
+      p = PopupMenu(locValuePosition);
+      if (p = 1) :
+        лок»нт = »нтƒокументќѕроживании;
+        –едактироватьƒокѕолучател€(лок»нт,“ипƒокѕолучѕроживание);
+        »нтƒокументќѕроживании = лок»нт;
+      elsif (p = 2) :
+        локƒокумент = »нтƒокументќѕроживании.Record;
+        »нтƒокументќѕроживании = nil;
+        локƒокумент.Delete;
+      fi;
+    fi;
+end;
+
+
+
+proc –едактироватьƒокѕолучател€(var лок»нт : —правочники.инт”достоверение—оц—трах; лок“ипƒокумента : integer);
+  var локƒокумент : Ѕазовый.—правочники.”достоверение;
+    if (лок»нт = nil) :
+      лок»нт = —правочники.инт”достоверение—оц—трах.—оздатьѕо«а€вке»“ипу(Self.Record,лок“ипƒокумента);
+    fi;
+    локƒокумент = лок»нт.Record;
+    —правочники.инт”достоверение—оц—трах.Ѕланк–едакторѕо”молчанию.ShowFormEx(локƒокумент , Kernel.Window.ModalWindow);
+    локƒокумент = —правочники.инт”достоверение—оц—трах.Ќайтиƒокументѕо«а€вке»“ипу(Self.Record,лок“ипƒокумента);
+    if (локƒокумент = nil) :
+      лок»нт = nil;
+    else
+      лок»нт.Record = локƒокумент;
+    fi;
+end;
+
+proc ¬ид‘ормы;
+ Template.BeginModify;
+   if (—писок‘реймов[јктивный–аздел] <> nil) :
+     Template.CurrentFrame = —писок‘реймов[јктивный–аздел];
+   fi;
+ Template.EndModify;
+end;
+
+proc ћодифицироватьЎаблонѕри—читывании;
+  Template.BeginModify;
+    ћодифицировать‘реймыѕо«авершено;
+    фрейм—остав‘ормы.ShowTabs = false;
+    «аголовк«а€вкиЌаЁкран;
+     нопкиƒоп—ервисЌаЁкран;
+    ћодифицировать нопки–азделов;
+  Template.EndModify;
+end;
+
+proc ћодифицироватьЎаблонѕо«авершено;
+  Template.BeginModify;
+    ћодифицировать‘реймыѕо«авершено;
+     нопкиƒоп—ервисЌаЁкран;
+    «аголовк«а€вкиЌаЁкран;
+  Template.EndModify;
+end;
+
+
+proc ћодифицировать‘реймыѕо«авершено;
+  ћодифицировать‘реймќсновные—ведени€;
+  ћодифицировать‘реймѕолучатель;
+  ћодифицировать‘реймƒокументыѕолучател€;
+  if (—писок‘реймов[–аздел—вед] = фрейм—ведени€ЅЋ) :
+    ћодифицировать‘рейм—ведени€ЅЋ;
+  fi;
+  if (—писок‘реймов[–аздел–асч] = фрейм–асчетЅЋ) :
+    ћодифицироватьфрейм–асчетЅЋ;
+  fi;
+  ћодифицировать‘рейм¬ыплата;
+end;
+
+proc ћодифицировать‘реймќсновные—ведени€;
+  var лок—екц : TemplateSection;
+  var locCol,i  : integer;
+    лок—екц = —екци€ѕо»мени('секцќсн—вед',фреймќсновные—ведени€);
+    locCol = —толбец—екцииѕо»мени(лок—екц,'стб—вед_ќсн—вед').Number;
+    for i = 1..лок—екц.RowsCount do
+      if (лок—екц.Cell[locCol,i].CellType = Template.FieldCell) :
+        лок—екц.Cell[locCol,i].Enabled = not «авершено;
+      fi;
+    end;
+end;
+
+
+
+proc ћодифицировать‘реймѕолучатель;
+  var лок—екц : TemplateSection;
+  var locCol,i  : integer;
+    лок—екц = —екци€ѕо»мени('секцѕолучатель',фреймѕолучатель);
+    locCol = —толбец—екцииѕо»мени(лок—екц,'стб—вед_ѕолуч').Number;
+    for i = 1..лок—екц.RowsCount do
+      if (лок—екц.Row[i].Name = 'стрјдрес_–ед') :
+        лок—екц.Row[i].Visible = not «авершено;
+      elsif (лок—екц.Row[i].Name = 'стрјдрес_Ќе–ед') :
+        лок—екц.Row[i].Visible = «авершено;
+      else
+        if (лок—екц.Cell[locCol,i].CellType = Template.FieldCell) :
+          лок—екц.Cell[locCol,i].Enabled = not «авершено;
+        fi;
+      fi;
+    end;
+end;
+
+proc ћодифицировать‘реймƒокументыѕолучател€;
+  var лок—екц : TemplateSection;
+  var i  : integer;
+    лок—екц = —екци€ѕо»мени('секцƒокѕолучател€',фреймƒокументыѕолучател€);
+    for i = 1..лок—екц.RowsCount do
+      if (лок—екц.Row[i].Name = 'стр”дЋичн_–ед') :
+        лок—екц.Row[i].Visible = not «авершено;
+      elsif (лок—екц.Row[i].Name = 'стр”дЋичн_Ќе–ед') :
+        лок—екц.Row[i].Visible = «авершено;
+      elsif (лок—екц.Row[i].Name = 'стрƒокѕрож_–ед') :
+        лок—екц.Row[i].Visible = not «авершено;
+      elsif (лок—екц.Row[i].Name = 'стрƒокѕрож_Ќе–ед') :
+        лок—екц.Row[i].Visible = «авершено;
+      fi;
+    end;
+end;
+
+proc ћодифицировать‘рейм—ведени€ЅЋ;
+  var лок—екц : TemplateSection;
+  var i,locCol  : integer;
+    лок—екц = —екци€ѕо»мени('секц—ведени€ЅЋ',фрейм—ведени€ЅЋ);
+    locCol = —толбец—екцииѕо»мени(лок—екц,'стб—вед_—ведЅЋ').Number;
+    for i = 1..лок—екц.RowsCount do
+      if (лок—екц.Cell[locCol,i].CellType = Template.CalcFieldCell) :
+        лок—екц.Cell[locCol,i].Enabled = not «авершено;
+        лок—екц.Cell[locCol,i].Button = not «авершено;
+      fi;
+    end;
+end;
+
+proc ћодифицировать‘рейм–асчетЅЋ;
+  var лок—екц : TemplateSection;
+  var i,locCol  : integer;
+    лок—екц = —екци€ѕо»мени('секц–асчЅЋ',фрейм–асчетЅЋ);
+    locCol = —толбец—екцииѕо»мени(лок—екц,'стб—вед_–асчЅЋ').Number;
+    for i = 1..лок—екц.RowsCount do
+      if (лок—екц.Cell[locCol,i].CellType = Template.CalcFieldCell) :
+        лок—екц.Cell[locCol,i].Enabled = not «авершено;
+        лок—екц.Cell[locCol,i].Button = not «авершено;
+      fi;
+    end;
+end;
+
+proc ћодифицировать‘рейм¬ыплата;
+  фрейм¬ыплата.CellByField['—пособ¬ыплаты'].Enabled = not «авершено;
+  фрейм¬ыплата.CellByField['ЅанкЌаим'].Enabled = not «авершено;
+  фрейм¬ыплата.CellByField['—четѕолучател€'].Enabled = not «авершено;
+  фрейм¬ыплата.CellByField['Ѕ» '].Enabled = not «авершено;
+  фрейм¬ыплата.CellByField['Ќомер арты'].Enabled = not «авершено;
+end;
+
+proc  нопкиƒоп—ервисЌаЁкран;
+  кн«авершить.Enabled = false;
+  кн¬–еестр.Enabled = false;
+  if («авершено) :
+    кн«авершить.Caption = 'ќтменить завершение';
+    if (ѕозици€–еестра = nil) :
+      кн«авершить.Enabled = true;
+    fi;
+  else
+    кн«авершить.Caption = '«авершить';
+    кн«авершить.Enabled = true;
+  fi;
+  if (ѕозици€–еестра <> nil) :
+    кн¬–еестр.Caption = '»з реестра';
+  else
+    кн¬–еестр.Caption = '¬ реестр';
+  fi;
+end;
+
+proc ћодифицировать нопки–азделов;
+  var лок—екц : TemplateSection;
+  var locCol[],i,j : integer;
+    лок—екц = —екци€ѕо»мени("секц–азделы",фрейм—одержание);
+    locCol = Ќомера—толбцовѕо»менам(лок—екц,['стб_–аздел–асчѕос','стб_–аздел–асчЌет']);
+    i = locCol[1];
+    j = locCol[2];
+    if (—писок‘реймов[–аздел–асч] = nil) :
+      лок—екц.Column[i].Visible = false;
+      лок—екц.Column[j].Visible = true;
+    else
+      лок—екц.Column[i].Visible = true;
+      лок—екц.Column[j].Visible = false;
+    fi;
+end;
+
+proc «аголовк«а€вкиЌаЁкран;
+  var лок—екц : TemplateSection;
+    лок—екц = —екци€ѕо»мени("секц«аголовок«а€вки",фрейм—одержание);
+    «аполнить«аголовок«а€вки;
+    лок—екц.Row[1].Visible = not «авершено;
+    лок—екц.Row[2].Visible = «авершено;
+end;
+
+proc «аполнить«аголовок«а€вки ;
+  «аголовок«а€вки = 'Ќомер за€вки '+ ЌомерЅум+ '.';
+  if («авершено) :
+    «аголовок«а€вки = «аголовок«а€вки + ' «а€вка завершена';
+  fi;
+  if (ѕозици€–еестра <> nil) :
+    «аголовок«а€вки = «аголовок«а€вки + ', включена в реестр є';
+  else
+    «аголовок«а€вки = «аголовок«а€вки + '.';
+  fi;
+end;
+
+
+
+
+--})
+
+--{{ ¬спомогательные методы дл€ работы с иконкой операции
+
+  proc «агрузить»конки ;
+    ImageLibr[iEdit] = Image.Create;
+    ImageLibr[iEdit].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\32\edit.ico');
+    ImageLibr[iReport] = Image.Create;
+    ImageLibr[iReport].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\32\information.ico');
+    ImageLibr[iMan] = Image.Create;
+    ImageLibr[iMan].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\Ѕизнесмен.ico');
+    ImageLibr[iDokMan] = Image.Create;
+    ImageLibr[iDokMan].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\ ниги.ico');
+    ImageLibr[iInput] = Image.Create;
+    ImageLibr[iInput].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\—правка.ico');
+    ImageLibr[iCalc] = Image.Create;
+    ImageLibr[iCalc].LoadFromFile('%Projects%\Ѕюджет_«ѕиƒƒ\ѕриложени€\»конки\32\calc.ico');
+    ImageLibr[iCalc_Disabled] = Image.Create;
+    ImageLibr[iCalc_Disabled].LoadFromFile('%Projects%\Ѕюджет_«ѕиƒƒ\ѕриложени€\»конки\32\calc_disabled.ico');
+    ImageLibr[iMoney] = Image.Create;
+    ImageLibr[iMoney].LoadFromFile('%Projects%\Ѕюджет_«ѕиƒƒ\ѕриложени€\»конки\¬ыплаты.ico');
+  end;
+
+ proc »нициализировать»конки;
+   »нициализировать»конкиѕолучатель;
+   »нициализировать»конкиƒокументыѕолучател€;
+   »нициализировать»конки–азделов;
+ end;
+
+ proc »нициализировать»конкиѕолучатель;
+  var лок—екц : TemplateSection;
+  var locCol,locRow : integer;
+    лок—екц = —екци€ѕо»мени("секцѕолучатель",фреймѕолучатель);
+    locRow = —трока—екцииѕо»мени(лок—екц,'стрјдрес_–ед').Number;
+    locCol = —толбец—екцииѕо»мени(лок—екц,'стб_ѕолучћеню').Number;
+    »нициализировать»конку_ летки(iEdit,лок—екц,locCol,locRow);
+ end;
+
+ proc »нициализировать»конкиƒокументыѕолучател€;
+  var лок—екц : TemplateSection;
+  var locCol,locRow[] : integer;
+    лок—екц = —екци€ѕо»мени("секцƒокѕолучател€",фреймƒокументыѕолучател€);
+    locCol = —толбец—екцииѕо»мени(лок—екц,'стб_ƒокѕолучћеню').Number;
+    locRow = Ќомера—трокѕо»менам(лок—екц,['стр”дЋичн_–ед','стрƒокѕрож_–ед']);
+    »нициализировать»конку_ летки(iEdit,лок—екц,locCol,locRow[1]);
+    »нициализировать»конку_ летки(iEdit,лок—екц,locCol,locRow[2]);
+ end;
+
+ proc »нициализировать»конки–азделов;
+  var лок—екц : TemplateSection;
+  var i,locRow : integer;
+    лок—екц = —екци€ѕо»мени("секц–азделы",фрейм—одержание);
+    locRow = —трока—екцииѕо»мени(лок—екц,'стр_–азделы').Number;
+    for i = 1..лок—екц.ColumnsCount do
+      if (лок—екц.Column[i].Name = 'стб_–азделќсн—вед') :
+        »нициализировать»конку_ летки(iReport,лок—екц,i,locRow);
+      elsif (лок—екц.Column[i].Name = 'стб_–азделѕолуч') :
+        »нициализировать»конку_ летки(iMan,лок—екц,i,locRow);
+      elsif (лок—екц.Column[i].Name = 'стб_–азделƒокѕолуч') :
+        »нициализировать»конку_ летки(iDokMan,лок—екц,i,locRow);
+      elsif (лок—екц.Column[i].Name = 'стб_–аздел—ведѕос') :
+        »нициализировать»конку_ летки(iInput,лок—екц,i,locRow);
+      elsif (лок—екц.Column[i].Name = 'стб_–аздел–асчѕос') :
+        »нициализировать»конку_ летки(iCalc,лок—екц,i,locRow);
+      elsif (лок—екц.Column[i].Name = 'стб_–аздел–асчЌет') :
+        »нициализировать»конку_ летки(iCalc_Disabled,лок—екц,i,locRow);
+      elsif (лок—екц.Column[i].Name = 'стб_–аздел—вед¬ыпл') :
+        »нициализировать»конку_ летки(iMoney,лок—екц,i,locRow);
+      fi;
+    end;
+ end;
+
+ proc »нициализировать»конку_ летки (iIco: тип»конка; locSect  : TemplateSection;
+                                      locCol : integer; locRow : integer);
+   var locCell : TemplateCell;
+     locCell = locSect.Cell[locCol,locRow];
+     locCell.Image = Image.Create;
+     locCell.ImageAlign = Template.AlignRight;
+     locCell.ImageWithText = true;
+     locCell.Contents = '';
+     locCell.Image.Assign(ImageLibr[iIco]);
+ end;
+--})
+
+
+
+func ѕоле_ѕри¬ыводе_«аголовокќкна‘ормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+  var aTxt: string[];
+  with —»—2.—троковые‘ункции  do
+    aTxt[1] = MarkInGray(Ќаше”чреждение.Ќаим);
+    aTxt[2] = '«а€вка на назначение '+ »м€ѕособи€–од(“ипѕособи€,“ипѕособи€ƒоп)+' ';
+    --aTxt[3] = MarkInGray('Ќомер '+ ЌомерЅум);
+    aTxt[3] = MarkInGray(—отрудник.»м€);
+    Return ћассив—трок¬“екст(aTxt);
+  end;
+end;
+
+
+-- 2_¬спомогательные методы0. --
+
+  proc ћодифицироватьЎаблон (Ўаблонћодифицирован: Logical = false);
+    фрейм«акладки.Image = ImageLibr[iEdit];
+    Template.FrameByName['фреймќсновные—ведени€1'].Image = ImageLibr[iReport];
+    Template.FrameByName['фреймѕолучатель1'].Image = ImageLibr[iMan];
+    inherited ћодифицироватьЎаблон(Ўаблонћодифицирован);
+  end;
+
+  proc ќформитьЌавигатор (тблЌавигатор: Grid);
+    inherited ќформитьЌавигатор(тблЌавигатор);
+    тблЌавигатор.ShowIcons = true;
+  end;
+
+--  proc —оздатьЌавигатор‘реймов;
+--    var i: integer;
+--    inherited —оздатьЌавигатор‘реймов;
+--    for i = 1 .. Self.тблЌавигатор‘реймов.Root.Count  do
+--      Self.тблЌавигатор‘реймов.Root.Items[i].Image =  ImageLibr[iReport];
+--    od;
+--  end;
+
+end

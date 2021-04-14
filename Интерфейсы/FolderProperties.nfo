@@ -3,3 +3,9 @@
   <Property Name="Title" Value="Интерфейсы записей"/>
   <Property Name="Required" Value="True"/>
 </Properties>
+<Items>
+  <Item Name="Справочники"/>
+  <Item Name="Данные"/>
+  <Item Name="Документы"/>
+  <Item Name="Расширения"/>
+</Items>

@@ -1,52 +1,65 @@
-class inherited јдрес .—правочники.редјдрес "–едактор адреса получател€ пособи€", editor Ѕазовый.—правочники.јдрес;
-
-
-
-
-
+class inherited јдрес .—правочники.редјдрес "јдрес получател€ пособи€", editor Ѕазовый.—правочники.јдрес;
 
 inobject private
 
---------------------------------------------------------------------------------
---{ ќбработчики событий бланка
+-- ќбработчики событий шаблона --
 
+  proc шаблон_ѕриќткрытии (Create: Logical);
+    var locCell: TemplateCell;
+    Template.BeginModify;
+      ----
+      --locCell = секц—убъект.CellByField['—убъект. од'];
+      --if (locCell <> nil): -- в случе повторного вызова  метода
+      --  locCell.Enabled = false;
+      --  locCell.Contents = ѕолучатель‘изЋицо. од;
+      --  locCell.OnDraw = 'ѕри–исовании_ акѕоле¬ывода';
+      --fi;
+      ----
+      --locCell = секц—убъект.CellByField['—убъект.»м€'];
+      --if (locCell <> nil):
+      --  locCell.Enabled = false;
+      --  locCell.Contents = ѕолучатель‘изЋицо.»м€;
+      --  locCell.Button = false;
+      --  locCell.OnDraw = 'ѕри–исовании_ акѕоле¬ывода';
+      --fi;
+      ----
+      --locCell = SectionCellByContents(секц—убъект, '»м€ субъекта');
+      --if (locCell <> nil):
+      --  locCell.Contents = 'ѕолучатель пособи€';
+      --fi;
+      ----
+      секц—убъект.ParentFrame.Visible = false;
+      locCell = секѕозиции“иповјдресов.CellByField['“ипјдресаѕрименен'];
+      if (locCell <> nil):
+        locCell.Enabled = false;
+      fi;
+    Template.EndModify;
+    inherited шаблон_ѕриќткрытии(Create);
+  end;
 
-proc шаблон_ѕриќткрытии(Create :Logical);
-  var Cell1,Cell2 : TemplateCell;
-  var locRow,locCol : integer;
-  Template.BeginModify;
-    Cell1 = секц—убъект. леткаѕоѕолю["—убъект.»м€"];
-    Cell1.CellType = Template.StaticCell;
-    Cell1.Contents = ѕолучатель‘изЋицо.»м€;
-    Cell2 = секц—убъект. леткаѕоѕолю["—убъект. од"];
-    Cell2.CellType = Template.StaticCell;
-    Cell2.Contents = ѕолучатель‘изЋицо. од;
-    Cell1.Style = Cell2.Style;
-    locRow = Cell1.Row;
-    locCol = Cell1.Column;
-    секц—убъект.Cell[locCol,locRow + 1].Contents = '»м€ получател€ пособи€';
-    Cell1 = секѕозиции“иповјдресов. леткаѕоѕолю["“ипјдресаѕрименен"];
-    Cell1.Enabled = false;
-  Template.EndModify;
-  inherited шаблон_ѕриќткрытии(Create);
-end;
+-- ќбработчики событий клеток шаблона --
 
+  func ѕоле«аголовокќкна‘ормы_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+    if (ѕолучатель‘изЋицо <> nil):
+      Return ѕолучатель‘изЋицо.»м€;
+    else
+      Cell.Font.Color = —»—2. онстанты.clRed;
+      Return 'ѕолучатель не указан';
+    fi;
+  end;
 
+-- ¬спомогательные методы --
 
   proc ѕоказать“ипыјдресов;
     “ипјдресаЌаим = nil;
     with Query.Create([Ѕазовый.—правочники.“ипјдреса]) do
       Order = 'Ќомер';
-      --if —убъект.‘изическоеЋицо or —убъект.—отрудник then
-        Filter = 'ƒл€‘излиц';
-      --elsif —убъект. онтрагент and —убъект.“ип онтрагента = 0 then
-      --  Filter = 'ƒл€ онтрагентов';
-      --fi;
+      Filter = 'ƒл€‘излиц';
       Select;
       while not Eof do
         —»—2.‘ункции.AddInArray(“ипјдресаЌаим, Current, true);
         Next;
-      end;
+      od;
       секѕозиции“иповјдресов.Count = Count;
     end;
   end;
@@ -55,13 +68,8 @@ end;
   end;
 
 
-
-
-
-
-
---}
-
-
+--  proc ѕоле_ѕри–исовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+--    inherited ѕри–исовании_ акѕоле¬ывода
+--  end;
 
 end

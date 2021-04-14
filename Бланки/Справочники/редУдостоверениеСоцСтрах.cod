@@ -1,30 +1,44 @@
-class inherited ТББ_Базовый.Справочники.редУдостоверение "", editor Базовый.Справочники.Удостоверение;
+class inherited ТББ_Базовый.Справочники.редУдостоверение "Удостоверение личности", editor Базовый.Справочники.Удостоверение;
 
 inobject private
 
 var фреймШапка : TemplateFrame;
 
+-- Обработчики событий шаблона --
 
---------------------------------------------------------------------------------
---{ Обработчики событий бланка
+  proc шаблон_ПриОткрытии (Create: Logical);
+    --var locCell: TemplateCell;
+    Template.BeginModify;
+      фреймШапка.Visible = false;
+      ----
+      --locCell = фреймШапка.CellByField['Физлицо.Код'];
+      --if (locCell <> nil): -- в случе повторного вызова  метода
+      --  locCell.Enabled = false;
+      --  locCell.Contents = ПолучательФизЛицо.Код;
+      --  locCell.OnDraw = 'ПриРисовании_КакПолеВывода';
+      --fi;
+      ----
+      --locCell = секцСубъект.CellByField['ФизЛицо'];
+      --if (locCell <> nil):
+      --  locCell.Enabled = false;
+      --  locCell.Contents = ПолучательФизЛицо.Имя;
+      --  locCell.Button = false;
+      --  locCell.OnDraw = 'ПриРисовании_КакПолеВывода';
+      --fi;
+      ----
+    Template.EndModify;
+    inherited шаблон_ПриОткрытии(Create);
+  end;
 
+-- Обработчики событий клеток шаблона --
 
-proc шаблон_ПриОткрытии(Create :Logical);
-  var Cell1,Cell2 : TemplateCell;
-  var locRow,locCol : integer;
-  Template.BeginModify;
-    Cell1 = фреймШапка.КлеткаПоПолю["ФизЛицо"];
-    Cell1.CellType = Template.StaticCell;
-    Cell1.Contents = ПолучательФизЛицо.Имя;
-    Cell2 = фреймШапка.КлеткаПоПолю["ФизЛицо.Код"];
-    Cell2.CellType = Template.StaticCell;
-    Cell2.Contents = ПолучательФизЛицо.Код;
-    Cell1.Style = Cell2.Style;
-    locRow = Cell2.Row;
-    locCol = Cell2.Column;
-    Cell2.Owner.Cell[locCol,locRow + 1].Contents = 'Код';
-  Template.EndModify;
-  inherited шаблон_ПриОткрытии(Create);
-end;
+  func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+    if (ПолучательФизЛицо <> nil):
+      Return ПолучательФизЛицо.Имя;
+    else
+      Cell.Font.Color = СИС2.Константы.clRed;
+      Return 'Получатель не указан';
+    fi;
+  end;
 
 end

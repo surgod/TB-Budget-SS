@@ -1,6 +1,7 @@
 ﻿[Options]
 Version=7
 Query=Базовый.Справочники.Адрес
+Filter=ПолучательФизЛицо<>nil
 MBlank=.Справочники.редАдресСоцСтрах
 CanHGroupModify=0
 OnMove=УдалитьЗаписьПозицииНавигатора
@@ -11,19 +12,21 @@ OnPost=картотека_ПриЗаписи
 OnCancel=картотека_ПриОтмене
 OnBeforeModify=картотека_ПередИзменением
 OnModify=картотека_ПриИзменении
-CanCopy=1
+CanInsert=0
+CanDelete=0
+CanMove=0
 OnClick=картотека_ПриНажатии
 ColumnCount=2
-Column:0=Субъект.Имя
+Column:0=ПолучательФизЛицо.Имя
 Column:1=Адрес_Строкой
 TreeWidth=120
 SubTableWidth=100
 SubTableHeight=100
 
-[.Column.Субъект.Имя]
-Caption=Наименование
-Width=100
+[.Column.ПолучательФизЛицо.Имя]
+Caption=Получатель пособия
+Width=0
 
 [.Column.Адрес_Строкой]
-Caption=Строковое представление адреса
-Width=284
+Caption=Адрес
+Width=0

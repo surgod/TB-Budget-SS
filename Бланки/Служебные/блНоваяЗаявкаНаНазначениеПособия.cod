@@ -1,115 +1,138 @@
 class inherited СИС2.БазовыйБланк "Мастер заявок на назначение пособия";
 
-import classes Константы,ФункцииПримененияКостант;
-
+  import ТББ_Базовый classes Переменные;
+  import classes Константы, ФункцииПримененияКостант;
 
 inobject private
 
+--{{ Свойства (1)
 
-  var НашеУчреждение : Базовый.Данные.Субъект;
-  var Сотрудник : Базовый.Данные.Субъект;
-  var НазначениеПособия : Бюджет_ЗПиДД.РасчетныеОперации.НазначениеПособия;
-  var НазначениеПособияДоп : Бюджет_ЗПиДД.РасчетныеОперации.НазначениеПособия;
-  var ТипИнфо : integer;
-  var ПричинаПерерасчета : integer;
+  var НашеУчреждение: Базовый.Данные.Субъект;
+  var Сотрудник: Базовый.Данные.Субъект;
+  var НазначениеПособия: Бюджет_ЗПиДД.РасчетныеОперации.НазначениеПособия;
+  var НазначениеПособияДоп: Бюджет_ЗПиДД.РасчетныеОперации.НазначениеПособия;
+  var ТипИнфо: integer;
+  var ПричинаПерерасчета: integer;
+  var НоваяЗаявка: Данные.ЗаявкаНаНазначениеПособия;
+  var ПараметрыНовойЗаписи: variant[2];
+--}}
 
-  var НоваяЗаявка : Данные.ЗаявкаНаНазначениеПособия;
-  var ПараметрыНовойЗаписи[2] : variant;
-
+-- 2_Конструкторы, визуализаторы0. --
 
 inclass public
 
-func CreateExt (локНашеУчреждение : Базовый.Данные.Субъект): Служебные.блНоваяЗаявкаНаНазначениеПособия;
-  Result = Служебные.блНоваяЗаявкаНаНазначениеПособия.Create;
-  Result.НашеУчреждение = локНашеУчреждение;
-end;
+  func CreateExt (локНашеУчреждение: Базовый.Данные.Субъект): Служебные.блНоваяЗаявкаНаНазначениеПособия;
+    Result = Служебные.блНоваяЗаявкаНаНазначениеПособия.Create;
+    Result.НашеУчреждение = локНашеУчреждение;
+  end;
 
-func OpenForm (локНашеУчреждение : Базовый.Данные.Субъект; var локПараметрыНовойЗаписи[2] : variant): integer;
-  var locForm: Служебные.блНоваяЗаявкаНаНазначениеПособия;
-  locForm = CreateExt (локНашеУчреждение);
-  if (CmOk = locForm.ShowEx( , Kernel.Window.ModalWindow)):
-    локПараметрыНовойЗаписи  = locForm.ПараметрыНовойЗаписи;
-    Return CmOk;
-  fi;
-end;
+  func OpenForm (локНашеУчреждение: Базовый.Данные.Субъект; var локПараметрыНовойЗаписи: variant[2]): integer;
+    var locForm: Служебные.блНоваяЗаявкаНаНазначениеПособия;
+    locForm = CreateExt(локНашеУчреждение);
+    if (CmOk = locForm.ShowEx( , Kernel.Window.ModalWindow)):
+      локПараметрыНовойЗаписи = locForm.ПараметрыНовойЗаписи;
+      Return CmOk;
+    fi;
+  end;
 
 
-
---------------------------------------------------------------------------------
 inobject private
 
---секции
-var секцСотрудник : TemplateSection;
-var секцНазначение : TemplateSection;
-var секцНазначениеДоп : TemplateSection;
-var секцТипИнфо : TemplateSection;
+--{{ Свойства (2)
+  -- фреймы
+  var frameStepsBar: TemplateFrame;
+  var фреймВвод: TemplateFrame;
 
---фреймы
+  -- секции
+  var sectStepsBar: TemplateSection;
+  var секцУчреждение: TemplateSection;
+  var секцСотрудник: TemplateSection;
+  var секцПособие: TemplateSection;
+  var секцПособиеДоп: TemplateSection;
+  var секцТипИнформации: TemplateSection;
 
-var фреймВвод :TemplateFrame;
-
---кнопки
-
-var кнНазад : Button;
-var кнДалее : Button;
-
-
-var НомерШага : integer;
-
---{{ Обработчики событий шаблона
-
-proc шаблон_ПриСоздании(Context :Variant);
-  inherited шаблон_ПриСоздании(Context);
-  ОбновитьСписокПоля(Template.CellByField['ТипИнфо'], ТипыИнфо);
-  ОбновитьСписокПоля(Template.CellByField['ПричинаПерерасчета'], ТипыПричиныПерерасчета);
-end;
-
-proc шаблон_ПриОткрытии(Create :Logical);
-  inherited шаблон_ПриОткрытии(Create);
-  НомерШага = 1;
-  ВидФормы;
-end;
-
+  -- кнопки
+  var кнНазад: Button;
+  var кнДалее: Button;
+  --
+  var НомерШага : integer;
 --}}
 
---{{ Обработчики событий клеток шаблона
+-- 2_Обработчики событий шаблона0. --
 
-func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
-  var локВидСО : Бюджет_ЗПиДД.Справочники.ВидыСтраховогоОбеспечения;
-  Result = '';
-  if (Cell.Contents = 'НашеУчреждение') :
-    return if(НашеУчреждение <> nil : НашеУчреждение.Наим, '');
-  elsif (Cell.Contents = 'Сотрудник') :
-    return if(Сотрудник <> nil : Сотрудник.Наим, '');
-  elsif (Cell.Contents = 'НазначениеПособия') :
-    if (НазначениеПособия <> nil) :
-      локВидСО = НазначениеПособия.ВидСтраховогоОбеспечения;
-      return if(локВидСО <> nil : локВидСО.Наим, '');
-    fi;
-  elsif (Cell.Contents = 'Период') :
-    if (НазначениеПособия <> nil) :
-      if (НазначениеПособия.ДатаНачала <> nil and НазначениеПособия.ДатаОкончания <> nil) :
-        return 'с ' + Str(НазначениеПособия.ДатаНачала) + ' по ' + Str(НазначениеПособия.ДатаОкончания);
+  proc шаблон_ПриСоздании(Context :Variant);
+    inherited шаблон_ПриСоздании(Context);
+    ОбновитьСписокПоля(Template.CellByField['ТипИнфо'], ТипыИнфо);
+    ОбновитьСписокПоля(Template.CellByField['ПричинаПерерасчета'], ТипыПричиныПерерасчета);
+  end;
+
+  proc шаблон_ПриОткрытии(Create :Logical);
+    inherited шаблон_ПриОткрытии(Create);
+    НомерШага = 1;
+    ВидФормы;
+  end;
+
+-- 2_Обработчики событий клеток шаблона0. --
+
+  func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): string;
+    var локВидСО: Бюджет_ЗПиДД.Справочники.ВидыСтраховогоОбеспечения;
+    Result = '';
+    if (Cell.Contents = 'НашеУчреждение'):
+       Return if(НашеУчреждение <> nil : НашеУчреждение.Имя, '');
+    elsif (Cell.Contents = 'Сотрудник'):
+      Return if(Сотрудник <> nil : Сотрудник.Имя, '');
+    elsif (Cell.Contents = 'НазначениеПособия') :
+      if (НазначениеПособия <> nil):
+        локВидСО = НазначениеПособия.ВидСтраховогоОбеспечения;
+        Return if(локВидСО <> nil : локВидСО.Имя, '');
+      fi;
+    elsif (Cell.Contents = 'Период'):
+      if (НазначениеПособия <> nil):
+        if (НазначениеПособия.ДатаНачала <> nil and НазначениеПособия.ДатаОкончания <> nil) :
+          Return Str(НазначениеПособия.ДатаНачала) + ' по ' + Str(НазначениеПособия.ДатаОкончания);
+        fi;
+      fi;
+    elsif (Cell.Contents = 'ДатаСтраховогоСлучая'):
+      if (НазначениеПособия <> nil) :
+        if (НазначениеПособия.ДатаСтраховогоСлучая <> nil):
+          Return Str(НазначениеПособия.ДатаСтраховогоСлучая);
+        fi;
+      fi;
+    elsif (Cell.Contents = 'НазначениеПособияДоп'):
+      if (НазначениеПособияДоп <> nil):
+        локВидСО = НазначениеПособияДоп.ВидСтраховогоОбеспечения;
+        Return if(локВидСО <> nil : локВидСО.Наим, '');
       fi;
     fi;
-  elsif (Cell.Contents = 'ДатаСтраховогоСлучая') :
-    if (НазначениеПособия <> nil) :
-      if (НазначениеПособия.ДатаСтраховогоСлучая <> nil) :
-        return  Str(НазначениеПособия.ДатаСтраховогоСлучая);
-      fi;
-    fi;
-  elsif (Cell.Contents = 'НазначениеПособияДоп') :
-    if (НазначениеПособияДоп <> nil) :
-      локВидСО = НазначениеПособияДоп.ВидСтраховогоОбеспечения;
-      return if(локВидСО <> nil : локВидСО.Наим, '');
-    fi;
-  fi;
-end;
+  end;
 
-func Поле_ПриВходе (Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
-  var локСубъект[] : Базовый.Данные.Субъект;
-  var локНазначениеПособия :  Бюджет_ЗПиДД.РасчетныеОперации.НазначениеПособия;
-  var локТипыПособий[] : integer;
+  func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+    --var aTxt: string[];
+    --with СИС2.СтроковыеФункции  do
+    --  aTxt[1] = MarkInGray('Мастер новой заявки');
+    --  aTxt[2] = '';
+    --  if (НомерШага = 1) :
+    --    aTxt[2] = 'Шаг 1: выбор сотрудника';
+    --  elsif (НомерШага = 2) :
+    --    aTxt[2] = 'Шаг 2: выбор назначения пособия';
+    --  elsif (НомерШага = 3) :
+    --    aTxt[2] = 'Шаг 3: ввод типа информации и причины перерасчета';
+    --  fi;
+    --  Return МассивСтрокВТекст(aTxt);
+    --end;
+    if (НомерШага = 1) :
+      Return 'Выбор сотрудника';
+    elsif (НомерШага = 2) :
+      Return 'Выбор назначенного пособия';
+    elsif (НомерШага = 3) :
+      Return 'Ввод типа информации и причины перерасчета';
+    fi;
+  end;
+
+  func Поле_ПриВходе (Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+    var локСубъект[] : Базовый.Данные.Субъект;
+    var локНазначениеПособия :  Бюджет_ЗПиДД.РасчетныеОперации.НазначениеПособия;
+    var локТипыПособий[] : integer;
     Result = false;
     if (Cell.Contents = 'Сотрудник') :
       if (CmOk = ТББ_Базовый.Справочники.Субъект.картСотрудник.ВыполнитьВыбор(локСубъект,НашеУчреждение)):
@@ -138,136 +161,149 @@ func Поле_ПриВходе (Cell: TemplateCell; Index: Integer; Action: Template.EnterTy
         ВидФормы;
       fi;
     fi;
-end;
+  end;
 
---}}
+  proc Поле_ПриВыходе (Cell: TemplateCell; Index: Integer);
+  end;
 
---{{ Обработчики событий прочих объектов шаблона
-
-proc кнНазад_ПриНажатии (Sender: Button);
-  if (НомерШага > 1) :
-    НомерШага = НомерШага - 1;
-    ВидФормы;
-  fi;
-end;
-
-proc кнДалее_ПриНажатии (Sender: Button);
-  var локПараметры[2] : variant;
-  if (кнДалее.Caption = 'Далее') :
-    НомерШага = НомерШага + 1;
-    ВидФормы;
-  elsif (кнДалее.Caption = 'Ок') :
-    локПараметры = Данные.интЗаявкаНаНазначениеПособия.ПараметрыНовойЗаявки(НазначениеПособия,НазначениеПособияДоп);
-    InsertInArray(локПараметры, LengthOfArray(локПараметры) + 1, ['ТипИнфо', ТипИнфо]);
-    InsertInArray(локПараметры, LengthOfArray(локПараметры) + 1, ['ПричинаПерерасчета', ПричинаПерерасчета]);
-    ПараметрыНовойЗаписи = локПараметры;
-    Close(CmOk);
-  else
-    Close(CmCancel);
-  fi;
-end;
-
-
---}}
-
-
---{{ Вспомогательные методы
-
-
-
-proc ВидФормы;
-  var ii : integer;
-  Template.BeginModify;
-    секцСотрудник.Visible = false;
-    секцНазначение.Visible = false;
-    секцНазначениеДоп.Visible = false;
-    секцТипИнфо.Visible = false;
-    if (НомерШага = 1) :
-      секцСотрудник.Visible = true;
-      --СекцияСотрудникНаЭкран;
-    elsif (НомерШага = 2) :
-      секцНазначение.Visible = true;
-      Template.CurrentCell = секцНазначение.CellByField['НазначениеПособия'];
-      if (НазначениеПособия = nil) :
-        секцНазначение.Row[2].Visible = false;
-        секцНазначение.Row[3].Visible = false;
-        секцНазначение.Row[4].Visible = true;
+  proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    if (Cell.Contents = 'НашеУчреждение'):
+      if ВыборНашегоРазрешен:
+        inherited ПриРисовании_КакПолеВыбора(Cell, Selected, Color, FieldColor, Font);
       else
-        if (НазначениеПособия.ДатаНачала <> nil and НазначениеПособия.ДатаОкончания <> nil) :
-          секцНазначение.Row[2].Visible = true;
-          секцНазначение.Row[3].Visible = false;
-          секцНазначение.Row[4].Visible = false;
-        else
-          секцНазначение.Row[2].Visible = false;
-          секцНазначение.Row[3].Visible = true;
-          секцНазначение.Row[4].Visible = false;
-        fi;
-      fi;
-      --СекцияНазначениеНаЭкран;
-    elsif (НомерШага = 3) :
-      секцТипИнфо.Visible = true;
-      --локВидСО = НазначениеПособия.ВидСтраховогоОбеспечения;
-      ii = ТипПособияПоКодуСО (НазначениеПособия.ВидСтраховогоОбеспечения.Код);
-      if (ii = ТипПособияБерем) :
-        секцНазначениеДоп.Visible = true;
+        inherited ПриРисовании_КакПолеВывода(Cell, Selected, Color, FieldColor, Font);
       fi;
     fi;
-    КнопкиНаЭкран;
-  Template.EndModify;
-end;
+  end;
 
-proc КнопкиНаЭкран;
-  if (НомерШага = 1) :
+-- 2_Обработчики событий прочих объектов шаблона0. --
+
+  proc кнНазад_ПриНажатии (Sender: Button);
+    if (НомерШага > 1):
+      НомерШага = НомерШага - 1;
+      ВидФормы;
+    fi;
+  end;
+
+  proc кнДалее_ПриНажатии (Sender: Button);
+    var локПараметры: variant[2];
+    if (кнДалее.Caption = 'Далее') :
+      НомерШага = НомерШага + 1;
+      ВидФормы;
+    elsif (кнДалее.Caption = 'Ок'):
+      локПараметры = Данные.интЗаявкаНаНазначениеПособия.ПараметрыНовойЗаявки(НазначениеПособия, НазначениеПособияДоп);
+      InsertInArray(локПараметры, LengthOfArray(локПараметры) + 1, ['ТипИнфо', ТипИнфо]);
+      InsertInArray(локПараметры, LengthOfArray(локПараметры) + 1, ['ПричинаПерерасчета', ПричинаПерерасчета]);
+      ПараметрыНовойЗаписи = локПараметры;
+      Close(CmOk);
+    else
+      Close(CmCancel);
+    fi;
+  end;
+
+-- 2_Вспомогательные методы0. --
+
+  proc ВидФормы;
+    var s: integer;
+    Template.BeginModify;
+      ModifyStepsBar;
+      for s = 1 .. фреймВвод.SectionsCount do
+        фреймВвод.Section[s].Visible = false;
+      od;
+      if (НомерШага = 1):    ВидФормы_Шаг1;
+      elsif (НомерШага = 2): ВидФормы_Шаг2;
+      elsif (НомерШага = 3): ВидФормы_Шаг3;
+      fi;
+    Template.EndModify;
+  end;
+
+  proc ВидФормы_Шаг1;
+    var locCell: TemplateCell;
+    секцУчреждение.Visible = true;
+    секцСотрудник.Visible = true;
+    locCell = секцУчреждение.CellByField['НашеУчреждение'];
+    locCell.Enabled = ВыборНашегоРазрешен;
+    if locCell.Enabled and (НашеУчреждение = nil):
+      Template.CurrentCell = locCell;
+    else
+      Template.CurrentCell = секцСотрудник.CellByField['Сотрудник'];
+    fi;
     кнНазад.Enabled = false;
-    кнДалее.Enabled = false;
+    кнДалее.Enabled = (Сотрудник <> nil);
     кнДалее.Caption = 'Далее';
-    if (Сотрудник <> nil) :
-      кнДалее.Enabled = true;
+  end;
+
+  proc ВидФормы_Шаг2;
+    var locCell: TemplateCell;
+    секцПособие.Visible = true;
+    Template.CurrentCell = секцПособие.CellByField['НазначениеПособия'];
+    locCell = SectionCellByNames(секцПособие, 'стлбЗаголовокШаг2', 'стркДатаСС');
+    locCell.Contents = if(НазначениеПособия <> nil, 'Дата страхового случая', '');
+    locCell = SectionCellByNames(секцПособие, 'стлбЗаголовокШаг2', 'стркПродолжительность');
+    if (НазначениеПособия <> nil) and (НазначениеПособия.ДатаНачала <> nil) and (НазначениеПособия.ДатаОкончания <> nil):
+      locCell.Contents = 'Продолжительность с';
+    else
+      locCell.Contents = '';
     fi;
-  elsif (НомерШага = 2) :
     кнНазад.Enabled = true;
-    кнДалее.Enabled = false;
+    кнДалее.Enabled = (НазначениеПособия <> nil);
     кнДалее.Caption = 'Далее';
-    if (НазначениеПособия <> nil) :
-      кнДалее.Enabled = true;
+  end;
+
+  proc ВидФормы_Шаг3;
+    var ii: Константы.ТипПособия;
+    секцТипИнформации.Visible = true;
+    ii = ТипПособияПоКодуСО(НазначениеПособия.ВидСтраховогоОбеспечения.Код);
+    if (ii = ТипПособияБерем) :
+      секцПособиеДоп.Visible = true;
     fi;
-  elsif (НомерШага = 3) :
     кнНазад.Enabled = true;
     кнДалее.Enabled = true;
     кнДалее.Caption = 'Ок';
-  fi;
-end;
-
---func СоздатьНовуюЗаявку : Данные.ЗаявкаНаНазначениеПособия;
---  var локИнт : Данные.интЗаявкаНаНазначениеПособия;
---  var локПараметры[2] : variant;
---    Result = nil;
- --   локПараметры = [['ТипИнфо', ТипИнфо] , ['ПричинаПерерасчета',ПричинаПерерасчета]];
- --   локИнт = Данные.интЗаявкаНаНазначениеПособия.Создать;
- --   локИнт.УстановитьПараметрыНовойЗаписи (локПараметры);
- --   локИнт.НоваяЗаявка(НазначениеПособия);
- --   return локИнт.Record;
---end;
-
---}}
-
-
-
-func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
-  var aTxt: string[];
-  with СИС2.СтроковыеФункции  do
-    aTxt[1] = MarkInGray('Мастер новой заявки');
-    aTxt[2] = '';
-    if (НомерШага = 1) :
-      aTxt[2] = 'Шаг 1: выбор сотрудника';
-    elsif (НомерШага = 2) :
-      aTxt[2] = 'Шаг 2: выбор назначения пособия';
-    elsif (НомерШага = 3) :
-      aTxt[2] = 'Шаг 3: ввод типа информации и причины перерасчета';
-    fi;
-    Return МассивСтрокВТекст(aTxt);
   end;
-end;
+
+  func ВыборНашегоРазрешен: logical;
+    if (ТекущееНашеУчреждение = nil):
+      with Query.Create([Базовый.Данные.Субъект]) do
+        Filter = 'Наше=true and not Подразделение';
+        Select;
+        if (Count = 1):
+          НашеУчреждение = Current;
+          Return false;
+        elsif (Count > 1):
+          НашеУчреждение = Current;
+          Return true;
+        fi;
+      end;
+    else
+      НашеУчреждение = ТекущееНашеУчреждение;
+      Return false;
+    fi;
+  end;
+
+  proc ModifyStepsBar;
+    var aCell: TemplateCell[];
+    frameStepsBar.Visible = true;
+    aCell[1] = sectStepsBar.Cell[1,1];
+    aCell[2] = sectStepsBar.Cell[2,1];
+    aCell[3] = sectStepsBar.Cell[3,1];
+    if (НомерШага in [0,1]): SetCell_StepIsCurrent(aCell[1]); SetCell_StepIsFuture(aCell[2]);  SetCell_StepIsFuture(aCell[3]);
+    elsif (НомерШага = 2):   SetCell_StepIsPassed(aCell[1]);  SetCell_StepIsCurrent(aCell[2]); SetCell_StepIsFuture(aCell[3]);
+    elsif (НомерШага = 3):   SetCell_StepIsPassed(aCell[1]);  SetCell_StepIsPassed(aCell[2]);  SetCell_StepIsCurrent(aCell[3]);
+    fi;
+  end;
+
+  proc SetCell_StepIsPassed (locCell: TemplateCell);
+    locCell.FieldColor = ТББ_Базовый.SysColors.ColorT9ByName('FrameColor');
+  end;
+
+  proc SetCell_StepIsCurrent (locCell: TemplateCell);
+    locCell.FieldColor = ТББ_Базовый.SysColors.ColorT9ByName('BkColor2');
+  end;
+
+  proc SetCell_StepIsFuture (locCell: TemplateCell);
+    locCell.FieldColor = СИС2.Константы.clNoColor;
+  end;
 
 
 end
