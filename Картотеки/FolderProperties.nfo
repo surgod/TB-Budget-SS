@@ -2,3 +2,11 @@
 <Properties Version="1">
   <Property Name="Title" Value="Формы картотек"/>
 </Properties>
+<Items>
+  <Item Name="Данные"/>
+  <Item Name="Документы"/>
+  <Item Name="Настройки"/>
+  <Item Name="РасчетныеОперации"/>
+  <Item Name="Справочники"/>
+  <Item Name="Расширения"/>
+</Items>
