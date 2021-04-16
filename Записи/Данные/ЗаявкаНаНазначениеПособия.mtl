@@ -19,7 +19,7 @@ record ЗаявкаНаНазначениеПособия inherited ТББ_Базовый.БазовыйДокумент title "За
   field СчетПолучателя : string title "Номер счета получателя";
   field БИК : string title "БИК";
   field НомерКарты : string title "Номер карты";
-  field Завершено: logical;
+  --field Завершено: logical;
   Unique НашеУчреждение, НомерБум;
 
   end;

@@ -41,7 +41,7 @@ inclass public
   end;
 
   func БланкРедакторПоУмолчанию: class BlankForm;
-    Result = Данные.редЗаявкаНаНазначениеПособия;
+    Result = Данные.редЗаявкаНаНазначениеПособия1;
   end;
 
   func КартотекаПоУмолчанию: class CardForm;

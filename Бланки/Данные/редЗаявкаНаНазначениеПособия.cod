@@ -50,7 +50,7 @@ var ImageLibr: Image[]; -- локальная библиотека изображений
 
 --сведения о заявке
 
-var ПризнакЗавершения : string = if (Завершено : 'Заявка завершена',  '');
+var ПризнакЗавершения : string = if (Завершен : 'Заявка завершена',  '');
 var НомерРеестра : string = if(ПозицияРеестра <> nil : Str(ПозицияРеестра.Реестр.НомерЗаДень), '');
 var ВидСО : Бюджет_ЗПиДД.Справочники.ВидыСтраховогоОбеспечения;
 
@@ -231,7 +231,7 @@ func ПолеСведенияБЛ_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Templa
   Result = false;
   if (ИнтСведения <> nil) :
     EditorPost;
-    Данные.редСведенияРеестраБЛ.ПоказатьМодально(ИнтСведения.Record,Cell.Contents,Завершено);
+    Данные.редСведенияРеестраБЛ.ПоказатьМодально(ИнтСведения.Record,Cell.Contents, Завершен);
   fi;
 end;
 
@@ -247,7 +247,7 @@ func ПолеРасчетБЛ_ПриВходе(Cell :TemplateCell; Index :Integer; Action : Template
   Result = false;
   if (ИнтРасчет <> nil) :
     EditorPost;
-    Данные.редРасчетРеестраБЛ.ПоказатьМодально(ИнтРасчет.Record,Cell.Contents,Завершено);
+    Данные.редРасчетРеестраБЛ.ПоказатьМодально(ИнтРасчет.Record,Cell.Contents, Завершен);
   fi;
 end;
 
@@ -311,14 +311,14 @@ proc кнЗавершить_ПриНажатии (Sender: Button);
   var Note : string;
   if (кнЗавершить.Caption = 'Завершить') :
     --нужна проверка
-     Завершено = true;
+     Завершен = true;
   else
     if (ПозицияРеестра <> nil) :
       Note = 'Нельзя снять с заявки признак завершения, так как она включена в реестр';
       Message(Note);
       return;
     else
-      Завершено = false;
+      Завершен = false;
     fi;
   fi;
   МодифицироватьШаблонПоЗавершено;
@@ -522,7 +522,7 @@ proc МодифицироватьФреймОсновныеСведения;
     locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_ОснСвед').Number;
     for i = 1..локСекц.RowsCount do
       if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
-        локСекц.Cell[locCol,i].Enabled = not Завершено;
+        локСекц.Cell[locCol,i].Enabled = not Завершен;
       fi;
     end;
 end;
@@ -536,12 +536,12 @@ proc МодифицироватьФреймПолучатель;
     locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_Получ').Number;
     for i = 1..локСекц.RowsCount do
       if (локСекц.Row[i].Name = 'стрАдрес_Ред') :
-        локСекц.Row[i].Visible = not Завершено;
+        локСекц.Row[i].Visible = not Завершен;
       elsif (локСекц.Row[i].Name = 'стрАдрес_НеРед') :
-        локСекц.Row[i].Visible = Завершено;
+        локСекц.Row[i].Visible = Завершен;
       else
         if (локСекц.Cell[locCol,i].CellType = Template.FieldCell) :
-          локСекц.Cell[locCol,i].Enabled = not Завершено;
+          локСекц.Cell[locCol,i].Enabled = not Завершен;
         fi;
       fi;
     end;
@@ -553,13 +553,13 @@ proc МодифицироватьФреймДокументыПолучателя;
     локСекц = СекцияПоИмени('секцДокПолучателя',фреймДокументыПолучателя);
     for i = 1..локСекц.RowsCount do
       if (локСекц.Row[i].Name = 'стрУдЛичн_Ред') :
-        локСекц.Row[i].Visible = not Завершено;
+        локСекц.Row[i].Visible = not Завершен;
       elsif (локСекц.Row[i].Name = 'стрУдЛичн_НеРед') :
-        локСекц.Row[i].Visible = Завершено;
+        локСекц.Row[i].Visible = Завершен;
       elsif (локСекц.Row[i].Name = 'стрДокПрож_Ред') :
-        локСекц.Row[i].Visible = not Завершено;
+        локСекц.Row[i].Visible = not Завершен;
       elsif (локСекц.Row[i].Name = 'стрДокПрож_НеРед') :
-        локСекц.Row[i].Visible = Завершено;
+        локСекц.Row[i].Visible = Завершен;
       fi;
     end;
 end;
@@ -571,8 +571,8 @@ proc МодифицироватьФреймСведенияБЛ;
     locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_СведБЛ').Number;
     for i = 1..локСекц.RowsCount do
       if (локСекц.Cell[locCol,i].CellType = Template.CalcFieldCell) :
-        локСекц.Cell[locCol,i].Enabled = not Завершено;
-        локСекц.Cell[locCol,i].Button = not Завершено;
+        локСекц.Cell[locCol,i].Enabled = not Завершен;
+        локСекц.Cell[locCol,i].Button = not Завершен;
       fi;
     end;
 end;
@@ -584,24 +584,24 @@ proc МодифицироватьФреймРасчетБЛ;
     locCol = СтолбецСекцииПоИмени(локСекц,'стбСвед_РасчБЛ').Number;
     for i = 1..локСекц.RowsCount do
       if (локСекц.Cell[locCol,i].CellType = Template.CalcFieldCell) :
-        локСекц.Cell[locCol,i].Enabled = not Завершено;
-        локСекц.Cell[locCol,i].Button = not Завершено;
+        локСекц.Cell[locCol,i].Enabled = not Завершен;
+        локСекц.Cell[locCol,i].Button = not Завершен;
       fi;
     end;
 end;
 
 proc МодифицироватьФреймВыплата;
-  фреймВыплата.CellByField['СпособВыплаты'].Enabled = not Завершено;
-  фреймВыплата.CellByField['БанкНаим'].Enabled = not Завершено;
-  фреймВыплата.CellByField['СчетПолучателя'].Enabled = not Завершено;
-  фреймВыплата.CellByField['БИК'].Enabled = not Завершено;
-  фреймВыплата.CellByField['НомерКарты'].Enabled = not Завершено;
+  фреймВыплата.CellByField['СпособВыплаты'].Enabled = not Завершен;
+  фреймВыплата.CellByField['БанкНаим'].Enabled = not Завершен;
+  фреймВыплата.CellByField['СчетПолучателя'].Enabled = not Завершен;
+  фреймВыплата.CellByField['БИК'].Enabled = not Завершен;
+  фреймВыплата.CellByField['НомерКарты'].Enabled = not Завершен;
 end;
 
 proc КнопкиДопСервисНаЭкран;
   кнЗавершить.Enabled = false;
   кнВРеестр.Enabled = false;
-  if (Завершено) :
+  if (Завершен) :
     кнЗавершить.Caption = 'Отменить завершение';
     if (ПозицияРеестра = nil) :
       кнЗавершить.Enabled = true;
@@ -637,13 +637,13 @@ proc ЗаголовкЗаявкиНаЭкран;
   var локСекц : TemplateSection;
     локСекц = СекцияПоИмени("секцЗаголовокЗаявки",фреймСодержание);
     ЗаполнитьЗаголовокЗаявки;
-    локСекц.Row[1].Visible = not Завершено;
-    локСекц.Row[2].Visible = Завершено;
+    локСекц.Row[1].Visible = not Завершен;
+    локСекц.Row[2].Visible = Завершен;
 end;
 
 proc ЗаполнитьЗаголовокЗаявки ;
   ЗаголовокЗаявки = 'Номер заявки '+ НомерБум+ '.';
-  if (Завершено) :
+  if (Завершен) :
     ЗаголовокЗаявки = ЗаголовокЗаявки + ' Заявка завершена';
   fi;
   if (ПозицияРеестра <> nil) :

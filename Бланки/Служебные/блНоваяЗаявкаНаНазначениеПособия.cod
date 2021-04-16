@@ -1,4 +1,4 @@
-class inherited СИС2.БазовыйБланк "Мастер заявок на назначение пособия";
+class inherited ТББ_Базовый.Базовые.Wizard "Мастер заявок на назначение пособия";
 
   import ТББ_Базовый classes Переменные;
   import classes Константы, ФункцииПримененияКостант;
@@ -39,23 +39,14 @@ inclass public
 inobject private
 
 --{{ Свойства (2)
-  -- фреймы
-  var frameStepsBar: TemplateFrame;
-  var фреймВвод: TemplateFrame;
 
   -- секции
-  var sectStepsBar: TemplateSection;
   var секцУчреждение: TemplateSection;
   var секцСотрудник: TemplateSection;
   var секцПособие: TemplateSection;
   var секцПособиеДоп: TemplateSection;
   var секцТипИнформации: TemplateSection;
 
-  -- кнопки
-  var кнНазад: Button;
-  var кнДалее: Button;
-  --
-  var НомерШага : integer;
 --}}
 
 -- 2_Обработчики событий шаблона0. --
@@ -107,19 +98,6 @@ inobject private
   end;
 
   func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
-    --var aTxt: string[];
-    --with СИС2.СтроковыеФункции  do
-    --  aTxt[1] = MarkInGray('Мастер новой заявки');
-    --  aTxt[2] = '';
-    --  if (НомерШага = 1) :
-    --    aTxt[2] = 'Шаг 1: выбор сотрудника';
-    --  elsif (НомерШага = 2) :
-    --    aTxt[2] = 'Шаг 2: выбор назначения пособия';
-    --  elsif (НомерШага = 3) :
-    --    aTxt[2] = 'Шаг 3: ввод типа информации и причины перерасчета';
-    --  fi;
-    --  Return МассивСтрокВТекст(aTxt);
-    --end;
     if (НомерШага = 1) :
       Return 'Выбор сотрудника';
     elsif (НомерШага = 2) :
@@ -178,37 +156,36 @@ inobject private
 
 -- 2_Обработчики событий прочих объектов шаблона0. --
 
-  proc кнНазад_ПриНажатии (Sender: Button);
-    if (НомерШага > 1):
-      НомерШага = НомерШага - 1;
-      ВидФормы;
-    fi;
+
+-- 2_Вспомогательные методы0. --
+
+  func ОбщееКоличествоШагов: integer;
+    Return 4;
   end;
 
-  proc кнДалее_ПриНажатии (Sender: Button);
+  func ИсходныеДанныеДостаточны: logical;
+    Return true;
+  end;
+
+  proc ПоказатьСледСтраницу;
     var локПараметры: variant[2];
-    if (кнДалее.Caption = 'Далее') :
-      НомерШага = НомерШага + 1;
-      ВидФормы;
-    elsif (кнДалее.Caption = 'Ок'):
+    if (НомерШага  = 3):
       локПараметры = Данные.интЗаявкаНаНазначениеПособия.ПараметрыНовойЗаявки(НазначениеПособия, НазначениеПособияДоп);
       InsertInArray(локПараметры, LengthOfArray(локПараметры) + 1, ['ТипИнфо', ТипИнфо]);
       InsertInArray(локПараметры, LengthOfArray(локПараметры) + 1, ['ПричинаПерерасчета', ПричинаПерерасчета]);
       ПараметрыНовойЗаписи = локПараметры;
       Close(CmOk);
     else
-      Close(CmCancel);
+      inherited ПоказатьСледСтраницу;
     fi;
   end;
-
--- 2_Вспомогательные методы0. --
 
   proc ВидФормы;
     var s: integer;
     Template.BeginModify;
       ModifyStepsBar;
-      for s = 1 .. фреймВвод.SectionsCount do
-        фреймВвод.Section[s].Visible = false;
+      for s = 1 .. фреймШаги.SectionsCount do
+        фреймШаги.Section[s].Visible = false;
       od;
       if (НомерШага = 1):    ВидФормы_Шаг1;
       elsif (НомерШага = 2): ВидФормы_Шаг2;
@@ -230,7 +207,7 @@ inobject private
     fi;
     кнНазад.Enabled = false;
     кнДалее.Enabled = (Сотрудник <> nil);
-    кнДалее.Caption = 'Далее';
+    кнДалее.Caption = 'Далее >';
   end;
 
   proc ВидФормы_Шаг2;
@@ -247,7 +224,7 @@ inobject private
     fi;
     кнНазад.Enabled = true;
     кнДалее.Enabled = (НазначениеПособия <> nil);
-    кнДалее.Caption = 'Далее';
+    кнДалее.Caption = 'Далее >';
   end;
 
   proc ВидФормы_Шаг3;
@@ -291,18 +268,6 @@ inobject private
     elsif (НомерШага = 2):   SetCell_StepIsPassed(aCell[1]);  SetCell_StepIsCurrent(aCell[2]); SetCell_StepIsFuture(aCell[3]);
     elsif (НомерШага = 3):   SetCell_StepIsPassed(aCell[1]);  SetCell_StepIsPassed(aCell[2]);  SetCell_StepIsCurrent(aCell[3]);
     fi;
-  end;
-
-  proc SetCell_StepIsPassed (locCell: TemplateCell);
-    locCell.FieldColor = ТББ_Базовый.SysColors.ColorT9ByName('FrameColor');
-  end;
-
-  proc SetCell_StepIsCurrent (locCell: TemplateCell);
-    locCell.FieldColor = ТББ_Базовый.SysColors.ColorT9ByName('BkColor2');
-  end;
-
-  proc SetCell_StepIsFuture (locCell: TemplateCell);
-    locCell.FieldColor = СИС2.Константы.clNoColor;
   end;
 
 
