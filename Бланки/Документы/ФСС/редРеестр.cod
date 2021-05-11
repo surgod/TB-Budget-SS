@@ -1,0 +1,555 @@
+class inherited ТББ_Базовый.Базовые.БазовыйБланкДокумент "Реестр пособий", editor Документы.ФСС.Реестр;
+
+import СИС2 classes Константы, Функции;
+import ТББ_Базовый classes Фильтры;
+
+--{{ Свойства
+
+InObject private
+
+  var Интерфейс: Документы.интРеестр;
+  var БиблиотекаСтилей: ТББ_Базовый.БиблиотекаСтилей;
+  var фреймСодержание: TemplateFrame;
+  var фреймРеквизиты: TemplateFrame;
+  var картШаблона_Заявки: TemplateCardfile;
+  var кнКоманда1: Button;
+  var кнКоманда2: Button;
+  var кнКоманда3: Button;
+  var кнКоманда4: Button;
+
+  var ОП_Подробно: logical;
+
+--}}
+
+--_ Конструкторы, визуализаторы. --
+
+--_ Обработчики событий шаблона. --
+
+  proc шаблон_ПриСоздании (Context: Variant);
+    ОП_Подробно = false;
+    ЗагрузитьИконки;
+    фреймСодержание.Orientation = Template.Horizontal;
+    фреймЗакладки.ShowTabs = false;
+    Template.FrameByName['фреймШапкаНавигатора'].Section[1].Row[1].Height = 5.8;
+    with Template.FrameByName['фреймОписаниеРаздела'].Section[1] do
+      AjustWidth = true;
+      Row[1].Height = 5.8;
+      CellByField['НадписьТекущегоФрейма'].Font.Size = 10;
+    end;
+    inherited шаблон_ПриСоздании(Context);
+  end;
+
+  proc шаблон_ПриОткрытии (Create: Logical);
+    БиблиотекаСтилей = ТББ_Базовый.БиблиотекаСтилей.CreateFromForm(Self);
+    inherited шаблон_ПриОткрытии(Create);
+  end;
+
+--_ Обработчики событий клеток шаблона. --
+
+  func Поле_ПриНажатии_УправлениеВидом (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
+    if (Cell.Owner.Name = 'секцОП'):
+      ОП_Подробно = not ОП_Подробно;
+      МодифицироватьШаблон_Секция_ОП;
+    fi;
+  end;
+
+  func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
+    if (Cell.Owner.ParentFrame.Name = 'фреймРеквизиты'):
+      if (Cell.Contents = '...'):
+        --ПоказатьКарточкуУчреждения;
+        Return;
+      elsif (Cell.Contents = 'q'):
+        if (НашеУчреждение <> nil):
+          --СвНП.НПЮЛ.НаимОрг = НашеУчреждение.Наим;
+          --СвНП.НПЮЛ.ИННЮЛ   = НашеУчреждение.ИНН;
+          --СвНП.НПЮЛ.КПП     = НашеУчреждение.КодПричины;
+          --СвНП.ОКТМО        = НашеУчреждение.ОКТМО;
+          --СвНП.Тлф          = НашеУчреждение.Телефон;
+        fi;
+      elsif (Cell.Contents = 'КромеОП'):
+        Изменить_КромеОп;
+        Return;
+      elsif (Cell.Contents = 'ТолькоОП'):
+        Изменить_ТолькоОП;
+        Return;
+      fi;
+    fi;
+  end;
+
+  func Поле_ПриВходе(Cell :TemplateCell; Index :Integer; Action :Template.EnterTypes) :Logical;
+    var локПодразделение: Базовый.Данные.Субъект;
+    if (Cell.Contents = 'Подразделение'):
+        if (НашеУчреждение <> nil):
+          локПодразделение = Подразделение;
+          if CmOk = ТББ_Базовый.Справочники.Субъект.картПодразделение.ВыполнитьВыбор(локПодразделение, НашеУчреждение, 'СтатусОбособленности>0 and ОтчетПоОП'):
+            Подразделение = локПодразделение;
+            --DisplayMessage('Изменились условия обработки. Возможно, требуется снова выполнить расчет!');
+          fi;
+        else
+          DisplayMessage('Отсутствуют данные об учреждении!');
+        fi;
+    else
+      Result = inherited Поле_ПриВходе(Cell, Index, Action);
+    fi;
+  end;
+
+  func Поле_ПриВыводе_ЗаголовокОкнаФормы (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+    var aTxt: string[];
+    with СИС2.СтроковыеФункции  do
+      aTxt[1] = MarkInGray(НашеУчреждение.Наим);
+      aTxt[2] = 'Реестр сведений, необходимых для назначения и выплаты пособий';
+      Return МассивСтрокВТекст(aTxt);
+    end;
+  end;
+
+  func Поле_ПриВыводе_ОП(Cell :TemplateCell; Value :Variant; Action :Template.OutputTypes; var Format :String) :Variant;
+    if (Cell.Contents = 'ВключаяОП'):
+      Return (not КромеОП) and (not ТолькоОП);
+    fi;
+  end;
+
+  func Поле_ПриВводе (Cell :TemplateCell; Value :Variant) :Logical;
+    if    (Cell.Contents = 'ИНН'):            --Return ИзменитьИНН(nil, Value as string);
+    elsif (Cell.Contents = 'КПП'):            --Return ИзменитьКПП(nil, Value as string);
+    elsif (Cell.Contents = 'ОГРН'):           --Return ИзменитьОКТМО(nil, Value as string);
+    elsif (Cell.Contents = '#РегНомерФСС'):   --Return ИзменитьТелефон(nil, Value as string);
+    fi;
+  end;
+
+
+
+--_ Обработчики событий прочих объектов шаблона. --
+
+  proc тблНавигаторФреймовПриПермещении (Sender: Grid);
+    var локЭлемент: Variant[];
+    Template.BeginModify;
+    локЭлемент = Sender.Current.Value as Variant[];
+    if (локЭлемент <> nil):
+      if (локЭлемент[1] <> ИмяКорняНавигатора): -- это не корень
+        ИзменитьСервисныеКоманды(Sender.Current);
+      fi;
+    fi;
+    inherited тблНавигаторФреймовПриПермещении(Sender);
+    ЗапретитьДоступККлеткамФрейма(фреймРеквизиты, not Завершен);
+    Template.EndModify;
+  end;
+
+  proc флЗавершен_ПриИзменении (Sender: CheckBox);
+    тблНавигаторФреймовПриПермещении(тблНавигаторФреймов);
+  end;
+
+  proc кнПриНажатии_ДобавитьЗаявку (Sender: Button);
+    var aValuePosition: variant[];
+    var p: integer;
+    aValuePosition[1] = 'Включить существующую заявку';
+    aValuePosition[2] = 'Создать заявку на основе назначения пособия';
+    p = PopupMenu(aValuePosition);
+    if (p = 1): Включение_Заявки;
+    elsif (p = 2): Создание_Заявки;
+    fi;
+  end;
+
+  proc кнПриНажатии_РедактироватьЗаявку (Sender: Button);
+    var cRecord: Данные.ЗаявкаНаНазначениеПособия;   -- текущая запись (current)
+    cRecord = картШаблона_Заявки.Current as Данные.ЗаявкаНаНазначениеПособия;
+    if (cRecord <> nil):
+      Бюджет_СоцСтрах.Данные.редЗаявкаНаНазначениеПособия1.OpenForm(cRecord);
+    fi;
+  end;
+
+  proc кнПриНажатии_УдалитьЗаявку (Sender: Button);
+    var cRecord: Данные.ЗаявкаНаНазначениеПособия;   -- текущая запись (current)
+    var sRecord: Данные.ЗаявкаНаНазначениеПособия[]; -- выделенные записи (selected)
+    var sCount, s, p: integer;
+    var aValuePosition: variant[];
+    cRecord = картШаблона_Заявки.Current as Данные.ЗаявкаНаНазначениеПособия;
+    sCount = картШаблона_Заявки.SelectedCount;
+    for s = 1 .. sCount do
+      sRecord[s] = картШаблона_Заявки.Selected[s] as Данные.ЗаявкаНаНазначениеПособия;
+    od;
+    if (cRecord <> nil) or (sRecord <> nil): -- продолжение выполнения возможно
+      if (cRecord <> nil) and (sRecord = nil): -- попытка удаления/исключения 1 записи
+        aValuePosition[1] = 'Удалить заявку № ' + cRecord.НомерБум + ' (' + cRecord.Сотрудник.Имя + ')|Удаление заявки из базы данных';
+        aValuePosition[2] = 'Исключить заявку № ' + cRecord.НомерБум + ' (' + cRecord.Сотрудник.Имя + ') из реестра|Исключение заявки из реестра без удаления из базы данных';
+        p = PopupMenu(aValuePosition);
+        if (p = 1): Удаление_Заявки(cRecord, false);
+        elsif (p = 2): Исключение_Заявки(cRecord);
+        fi;
+      elsif (cRecord = nil) and (sRecord <> nil): -- попытка удаления/исключения выделеных записей
+        aValuePosition[1] = 'Удалить заявки (' + Str(sCount) + ')|Удаление заявок из базы данных';
+        aValuePosition[2] = 'Исключить заявки из реестра (' + Str(sCount) + ')|Исключение заявок из реестра без удаления из базы данных';
+        p = PopupMenu(aValuePosition);
+        if (p = 1): Удаление_Заявок(false);
+        elsif (p = 2): Исключение_Заявок(false);
+        fi;
+      fi;
+    fi;
+  end;
+
+
+--_ Дополнительные команды. --
+
+--_ Вспомогательные методы. --
+
+  -- Обработка изображений --
+
+  type типИконка = (iExpand, iCollapse, iCover);
+  var ImageLibr: Image[]; -- локальная библиотека изображений
+
+  --@doc Загрузка в этот класс изображений
+  proc ЗагрузитьИконки;
+    -- например: ЗагрузитьИконку (iUpdate, '%Projects%\XXX.ico'); и т.д.
+    -- При необходимости расширить кол-во использующихся изображений поле типИконка должно изменяться в этом классе,
+    -- но наполнение этого метода может быть изменено в наследниках
+    ImageLibr = nil;
+    ЗагрузитьИконку (iExpand,       '%Projects%\МашинаРеквизитов\Приложения\Иконки\Expand.ico');
+    ЗагрузитьИконку (iCollapse,     '%Projects%\МашинаРеквизитов\Приложения\Иконки\Collapse.ico');
+    ЗагрузитьИконку (iCover,        '%Projects%\Бюджет_ЗПиДД\Приложения\Иконки\16\ButtonCover.ico');
+  end;
+
+  proc ЗагрузитьИконку (iIco: типИконка; locFullPath: string);
+    ImageLibr[iIco] = Image.Create;
+    ImageLibr[iIco].LoadFromFile(locFullPath);
+  end;
+
+  --@doc Загрузка в клетку-гиперссылку изображения
+  proc ИнициализироватьИконку_Клетки (locCell: TemplateCell; iIco: типИконка; locHintContent: string = nil; locSize: integer = nil);
+    if not (nil in [locCell, iIco]):
+      locCell.Hint = locHintContent;
+      locCell.Image = Image.Create;
+      locCell.ImageAlign = Template.AlignRight;
+      locCell.ImageWithText = true;
+      locCell.Contents = '';
+      locCell.Image.Assign(ImageLibr[iIco]);
+      if (locSize<>nil):
+        locCell.ImageSize = locSize;
+      fi;
+    fi;
+  end;
+
+  -- Другие вспомогательные методы --
+
+  proc Изменить_КромеОп;
+    КромеОП = not КромеОП;
+    if КромеОП:
+      ТолькоОП = false;
+    fi;
+    if (not ТолькоОП):
+      Подразделение = nil;
+    fi;
+    --if (КоличествоСправокВПодшивке > 0):
+    --  if CmOk = EnqOkCancel('Изменились условия формирования отчета. Удалить ранее созданные справки?'):
+    --    УдалениеВсехСправок;
+    --  else
+    --    СинхронизироватьУсловияРасчетаВСправках;
+    --  fi;
+    --fi;
+  end;
+
+  proc Изменить_ТолькоОП;
+    ТолькоОП = not ТолькоОП;
+    if ТолькоОП:
+      КромеОП = false;
+    fi;
+    if (not ТолькоОП):
+      Подразделение = nil;
+    fi;
+    --if (КоличествоСправокВПодшивке > 0):
+    --  if CmOk = EnqOkCancel('Изменились условия формирования отчета. Удалить ранее созданные справки?'):
+    --    УдалениеВсехСправок;
+    --  else
+    --    СинхронизироватьУсловияРасчетаВСправках;
+    --  fi;
+    --fi;
+  end;
+
+  proc МодифицироватьШаблон (ШаблонМодифицирован: Logical = false); -- ВИД ФОРМЫ
+    МодифицироватьШаблон_картЗаявки;
+  end;
+
+  proc МодифицироватьШаблон_картЗаявки;
+    картШаблона_Заявки.Filter = 'Реестр=' + Str(Self.Record);
+    if (картШаблона_Заявки.ColumnsCount = 0):
+      with картШаблона_Заявки do
+        Font.Size = БиблиотекаСтилей.StyleByName('Текст шаблона').Font.Size;
+        Font.Bold = true;
+        Align = true;
+      end;
+      -- столбцы --
+      ДобавитьСтолбецКартотеки_Номер;
+      ДобавитьСтолбецКартотеки_Получатель;
+      ДобавитьСтолбецКартотеки_ВидПособия;
+    fi;
+  end;
+
+  proc МодифицироватьШаблон_Секция_ОП;
+    var _секцОП: TemplateSection;
+    var _ЕстьОбособленныеПодразделения: logical;
+    var locCell: TemplateCell;
+    var r, rr: integer;
+    _секцОП = SectionByName('секцОП');
+    _ЕстьОбособленныеПодразделения = ТББ_Базовый.Библио.ЕстьОбособленныеПодразделения(НашеУчреждение);
+    _секцОП.Visible = _ЕстьОбособленныеПодразделения;
+    with _секцОП.CellByField['Подразделение'] do
+      Enabled = ТолькоОП and _ЕстьОбособленныеПодразделения;
+      OnDraw = if(not Enabled, 'ПриРисовании_КакЗапрещенное', 'ПриРисовании_КакПолеВыбора');
+    end;
+    -- свертка области
+    locCell = _секцОП.Cell[3,2];
+    if ОП_Подробно:
+      ИнициализироватьИконку_Клетки(locCell, iExpand);
+    else
+      ИнициализироватьИконку_Клетки(locCell, iCollapse);
+    fi;
+    rr = _секцОП.RowsCount;
+    for r = 1 .. rr do
+      _секцОП.Row[r].Visible = ОП_Подробно or (_секцОП.Row[r].Name <> nil);
+    od;
+  end;
+
+  proc ДобавитьСтолбецКартотеки_Номер;
+    with картШаблона_Заявки.AddColumn do
+      FieldName = 'НомерПозиции';
+      Caption = '№';
+      Hint = 'Номер в реестре';
+      Width = 60;
+      MinWidth = 60;
+      Alignment = Template.CenterAlign;
+      FieldType = Template.CalcField;
+      Font.Size = картШаблона_Заявки.Font.Size;
+      Font.Color = clGray;
+    end;
+  end;
+
+  proc ДобавитьСтолбецКартотеки_Получатель;
+    with картШаблона_Заявки.AddColumn do
+      FieldName = 'Сотрудник.Имя';
+      Caption = 'Получатель пособия';
+      Hint = 'Получатель пособия';
+      Width = 0;
+      MinWidth = 100;
+      Alignment = Template.LeftAlign;
+      FieldType = Template.ReferenceField;
+      Font.Size = картШаблона_Заявки.Font.Size;
+      Font.Color = clGray;
+    end;
+  end;
+
+  proc ДобавитьСтолбецКартотеки_ВидПособия;
+    with картШаблона_Заявки.AddColumn do
+      FieldName = 'НазначениеПособия.ВидСтраховогоОбеспечения.Имя';
+      Caption = 'Вид пособия';
+      Hint = 'Вид пособия (вид страхового обеспечения)';
+      Width = 0;
+      MinWidth = 100;
+      Alignment = Template.LeftAlign;
+      FieldType = Template.ReferenceField;
+      Font.Size = картШаблона_Заявки.Font.Size;
+      Font.Color = clGray;
+    end;
+  end;
+
+  proc ИзменитьСервисныеКоманды (locGridItem: GridItem);
+    var locGridValue: Variant[];
+    var locFrameName, locParentFrameName: string;
+    with кнКоманда1 do
+      Visible = true;
+      Enabled = (КоличествоЗаявок = 0) and (not Завершен);
+      Caption = 'Заполнить';
+      Hint = 'Заполнить реестр заявками на оплату пособий';
+      OnClick = '';
+    end;
+    locGridValue = locGridItem.Value as Variant[];
+    locFrameName = locGridValue[2] as String;
+    locParentFrameName = locGridValue[3] as String;
+    if ('фреймРеквизиты' in [locFrameName,locParentFrameName]): ИзменитьСервисныеКоманды_Реквизиты;
+    elsif ('фреймЗаявки' in [locFrameName,locParentFrameName]): ИзменитьСервисныеКоманды_Реестр;
+    fi;
+  end;
+
+  proc ИзменитьСервисныеКоманды_Реквизиты;
+    with кнКоманда2 do
+      Visible = false;
+    end;
+    with кнКоманда3 do
+      Visible = false;
+    end;
+    with кнКоманда4 do
+      Visible = false;
+    end;
+  end;
+
+  proc ИзменитьСервисныеКоманды_Реестр;
+    with кнКоманда2 do
+      Visible = true;
+      Enabled = not Завершен;
+      Caption = 'Добавить';
+      Hint = '';
+      OnClick = 'кнПриНажатии_ДобавитьЗаявку';
+    end;
+    with кнКоманда3 do
+      Visible = true;
+      Enabled = (КоличествоЗаявок > 0);
+      Caption = 'Редактировать';
+      Hint = '';
+      OnClick = 'кнПриНажатии_РедактироватьЗаявку';
+    end;
+    with кнКоманда4 do
+      Visible = true;
+      Enabled = (КоличествоЗаявок > 0);
+      Caption = 'Удалить';
+      Hint = '';
+      OnClick = 'кнПриНажатии_УдалитьЗаявку';
+    end;
+  end;
+
+  func КоличествоЗаявок: integer;
+    with Query.Create([Бюджет_СоцСтрах.Данные.ЗаявкаНаНазначениеПособия]) do
+      Filter = 'Реестр=' + Str(Self.Record);
+      Return Count;
+    end;
+  end;
+
+  proc Включение_Заявки;
+    var локРезультатВыбора: Данные.ЗаявкаНаНазначениеПособия;
+    if (cmOk = Данные.картЗаявкаНаНазначениеПособия.ВыполнитьВыбор(локРезультатВыбора, ПолучитьДопустимыеЗаявки)):
+      локРезультатВыбора.Реестр = Self.Record;
+      СИС2.ФункцииДокумента.RecordPostIfNeed(локРезультатВыбора);
+      картШаблона_Заявки.Update;
+      тблНавигаторФреймовПриПермещении(тблНавигаторФреймов);
+    fi;
+  end;
+
+  func ПолучитьДопустимыеЗаявки: Данные.ЗаявкаНаНазначениеПособия[];
+    var мПодразделенияКромеОП: Базовый.Данные.Субъект[];
+    var aFlt: string[];
+    var мПодразделенияСотрудника: Базовый.Данные.Субъект[];
+    var p: integer;
+    var OnOff: logical;
+    мПодразделенияКромеОП = ТББ_Базовый.Библио.ПодразделенияКромеОбособленных(НашеУчреждение);
+    with Query.Create([Бюджет_СоцСтрах.Данные.ЗаявкаНаНазначениеПособия]) do
+      AddInArray(aFlt, 'НашеУчреждение=' + Str(НашеУчреждение));
+      AddInArray(aFlt, 'not Завершен');
+      Filter = СложитьСтрокиФильтраПоИ(aFlt);
+      Select;
+      while not Eof do
+        if (not КромеОП) and (not ТолькоОП):
+          AddInArray(Result, Current);
+        elsif ТолькоОП:
+          if (Подразделение in ПодразделенияСотрудника(Current.Сотрудник)):
+            AddInArray(Result, Current);
+          fi;
+        elsif КромеОП:
+          мПодразделенияСотрудника = ПодразделенияСотрудника(Current.Сотрудник);
+          for p = 1 .. LengthOfArray(мПодразделенияСотрудника) do
+            OnOff = мПодразделенияСотрудника[p] in мПодразделенияКромеОП;
+            if OnOff:
+              AddInArray(Result, Current);
+              Break;
+            fi;
+          od;
+        fi;
+        Next;
+      od;
+    end;
+  end;
+
+  func ПодразделенияСотрудника (локСотрудник: Базовый.Данные.Субъект): Базовый.Данные.Субъект[]; -- в контексте учетного периода
+    var мНазначенияСотрудника: Бюджет_Персонал.АтрибутыСотрудника.Назначение[];
+    var n: integer;
+    var locResult: Базовый.Данные.Субъект[];
+    if (УчетныйПериод <> nil):
+      мНазначенияСотрудника = Бюджет_Персонал.Библио.АктуальныеНазначения (локСотрудник, , , УчетныйПериод.ДатаНачала, УчетныйПериод.ДатаОкончания);
+      for n = 1 .. LengthOfArray(мНазначенияСотрудника) do
+        AddInArray(locResult, мНазначенияСотрудника[n].Подразделение);
+      od;
+      Return locResult;
+    fi;
+  end;
+
+  proc Создание_Заявки;
+  end;
+
+  proc Удаление_Заявки (локЗаписьЗаявки: Бюджет_СоцСтрах.Данные.ЗаявкаНаНазначениеПособия; локПодтверждение: logical);
+    var интЗаявка: Данные.интЗаявкаНаНазначениеПособия;
+    if (локЗаписьЗаявки <> nil) and (not Завершен):
+      интЗаявка = Данные.интЗаявкаНаНазначениеПособия.OpenRecord(локЗаписьЗаявки);
+      if (интЗаявка <> nil):
+        интЗаявка.Delete(локПодтверждение);
+      fi;
+      картШаблона_Заявки.Update;
+      тблНавигаторФреймовПриПермещении(тблНавигаторФреймов);
+    else
+      DisplayMessage('Работа над реестром завершена. Удаление из документа заявок не допускается.');
+    fi;
+  end;
+
+  proc Удаление_Заявок (локПодтверждение: logical);
+    var k, kk: integer;
+    var локРешениеУдалить: logical;
+    var интЗаявка: Данные.интЗаявкаНаНазначениеПособия;
+    if (not Завершен):
+      if локПодтверждение:
+        локРешениеУдалить = (CmOk = EnqOkCancel('Удалить выделенные заявки?'));
+      else
+        локРешениеУдалить = true;
+      fi;
+      if локРешениеУдалить:
+        kk = картШаблона_Заявки.SelectedCount;
+        for k = 1 .. kk do
+          Hint('Удаление заявок...', k, kk);
+          интЗаявка = Данные.интЗаявкаНаНазначениеПособия.OpenRecord(картШаблона_Заявки.Selected[k]);
+          if (интЗаявка <> nil):
+            интЗаявка.Delete(false);
+          fi;
+        od;
+        картШаблона_Заявки.DeselectRecords;
+        картШаблона_Заявки.Update;
+        тблНавигаторФреймовПриПермещении(тблНавигаторФреймов);
+      fi;
+    else
+      DisplayMessage('Работа над реестром завершена. Удаление из документа заявок не допускается.');
+    fi;
+  end;
+
+  proc Исключение_Заявки (локЗаписьЗаявки: Бюджет_СоцСтрах.Данные.ЗаявкаНаНазначениеПособия);
+    if (локЗаписьЗаявки <> nil) and (not Завершен):
+      локЗаписьЗаявки.Реестр = nil;
+      СИС2.ФункцииДокумента.RecordPostIfNeed(локЗаписьЗаявки);
+      картШаблона_Заявки.Update;
+      тблНавигаторФреймовПриПермещении(тблНавигаторФреймов);
+    else
+      DisplayMessage('Работа над реестром завершена. Исключение из документа заявок не допускается.');
+    fi;
+  end;
+
+  proc Исключение_Заявок (локПодтверждение: logical);
+    var k, kk: integer;
+    var локЗаписьЗаявки: Бюджет_СоцСтрах.Данные.ЗаявкаНаНазначениеПособия;
+    var локРешениеИсключить: logical;
+    if (not Завершен):
+      if локПодтверждение:
+        локРешениеИсключить = (CmOk = EnqOkCancel('Исключить из реестра выделенные заявки?'));
+      else
+        локРешениеИсключить = true;
+      fi;
+      if локРешениеИсключить:
+        kk = картШаблона_Заявки.SelectedCount;
+        for k = 1 .. kk do
+          Hint('Исключение заявок...', k, kk);
+          локЗаписьЗаявки = картШаблона_Заявки.Selected[k] as Бюджет_СоцСтрах.Данные.ЗаявкаНаНазначениеПособия;
+          локЗаписьЗаявки.Реестр = nil;
+          СИС2.ФункцииДокумента.RecordPostIfNeed(локЗаписьЗаявки);
+        od;
+        картШаблона_Заявки.DeselectRecords;
+        картШаблона_Заявки.Update;
+        тблНавигаторФреймовПриПермещении(тблНавигаторФреймов);
+      fi;
+    else
+      DisplayMessage('Работа над реестром завершена. Исключение из документа заявок не допускается.');
+    fi;
+  end;
+
+
+
+end

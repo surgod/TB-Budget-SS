@@ -2,3 +2,8 @@
 <Properties Version="1">
   <Property Name="Title" Value="Интерфейсы документов"/>
 </Properties>
+<Items>
+  <Item Name="интРеестр"/>
+  <Item Name="интЗаявление"/>
+  <Item Name="интРеестр_старый"/>
+</Items>

@@ -1,0 +1,94 @@
+Class inherited ТББ_Базовый.Базовые.картДокумент "Реестр сведений, необходимых для назначения и выплаты пособий";
+
+Import СИС2 Classes СтроковыеФункции;
+Import ТББ_Базовый Classes Фильтры;
+
+--{{ Свойства
+
+inclass public
+
+  var КлассИнтерфейса :Class МашинаРеквизитов.Базовые.интЗапись = Документы.интРеестр;
+  stored var ГодСв: integer;
+  var ПолеСтолбцаНаше: String:= 'НашеУчреждение.Имя';
+  var ИдентифицироватьНашеПриСоздании: logical = true;
+
+  inobject private
+
+  var ГодСвОбъекта: integer; -- для экземпляра картотеки
+--}}
+
+--_ Конструкторы, визуализаторы. --
+
+--_ Обработчики событий шаблона. --
+
+  proc шаблон_ПриОткрытии(Create: Logical);
+    var locCell: TemplateCell;
+    ПараметрыНовойЗаписи = nil;
+    ДобавитьПараметрНовойЗаписи('Дата', today);
+    inherited шаблон_ПриОткрытии(Create); -- здесь выполнится в т.ч. проверка возможности заполенения полей, связанных с "нашим" учреждением
+--    if (НашеУчреждение <> nil):
+--      ДобавитьПараметрНовойЗаписи('КодНО', НашеУчреждение.КодГни);
+--      ДобавитьПараметрНовойЗаписи('ОКТМО', НашеУчреждение.ОКТМО);
+--      ДобавитьПараметрНовойЗаписи('Телефон', НашеУчреждение.Телефон);
+--    fi;
+    locCell = Template.FrameByName['фреймФильтр'].CellByField['ГодСвОбъекта'];
+    locCell.List.Clear;
+    with Query.Create([ТББ_Базовый.Справочники.ПериодыРасчета]) do
+      Filter = 'Match(Код,"????") and Код>="2021"';
+      Order = 'Код';
+      Select;
+      while (not Eof) do
+        locCell.List.Add(Current.Код + '|' + Current.Код); Next;
+      od;
+    end;
+  end;
+
+
+--_ Обработчики событий клеток шаблона. --
+
+  proc ПолеШаблона_ПриВыходе(Cell: TemplateCell; Index: Integer);
+    if (Cell.Contents = 'НашеУчреждение'):
+      ОбновитьФильтр;
+      Template.CellByField['ГодСвОбъекта'].SetFocus;
+    elsif (Cell.Contents = 'ГодСвОбъекта'):
+      ГодСв = ГодСвОбъекта;
+      ОбновитьФильтр;
+    fi;
+  end;
+
+  func ПолеШаблона_ПриВыводе(Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+    if (Cell.Contents = 'НашеУчреждение'):
+      Result = inherited ПолеШаблона_ПриВыводе(Cell, Value, Action, Format);
+    elsif (Cell.Contents = 'ГодСвОбъекта'):
+      if Cell.Value = nil:
+        Result = MarkInItalic(MarkInGray('Все'));
+      else
+        Result = ГодСвОбъекта;
+      fi;
+    fi;
+  end;
+
+--_ Обработчики событий прочих объектов шаблона. --
+
+--_ Обработчики событий картотеки. --
+
+--_ Обработчики столбцов (полей) картотеки. --
+
+--_ Дополнительные команды. --
+
+--_ Вспомогательные методы. --
+
+  inobject private
+
+  --@doc Ф-я перекрывает СИС2, устанавливает фильтр на кртотеку через контролы шаблона
+  func ПолучитьФильтрКартотеки(var locTreeFilter: string = nil): string;
+    var aFlt: string[];
+    ГодСвОбъекта = ГодСв;
+    aFlt[1] = inherited ПолучитьФильтрКартотеки(locTreeFilter);
+    aFlt[2] = if(ГодСвОбъекта > 0, 'Year(Дата)=' + Str(ГодСвОбъекта), nil);
+    Result = ТББ_Базовый.Фильтры.СложитьСтрокиФильтраПоИ(aFlt);
+  end;
+
+
+
+end

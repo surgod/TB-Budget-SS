@@ -2,3 +2,8 @@
 <Properties Version="1">
   <Property Name="Title" Value="Картотеки документов для взаимодействия с ФСС"/>
 </Properties>
+<Items>
+  <Item Name="ФСС"/>
+  <Item Name="Кадры"/>
+  <Item Name="картЗаявление"/>
+</Items>

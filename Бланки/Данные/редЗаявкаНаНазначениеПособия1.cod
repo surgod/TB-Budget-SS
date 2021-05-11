@@ -56,55 +56,63 @@ inobject private
   var ƒатаќкончани€ЅЋ : date;
   var ƒата¬ыходаЌа–аботу : date;
   var ƒата–егистрации¬_ћ—Ё : date;
-
 --}}
-
 
 -- _ онструкторы, визуализаторы. --
 
+  inclass public
+
+  func OpenForm (лок«апись: Ѕюджет_—оц—трах.ƒанные.«а€вкаЌаЌазначениеѕособи€): integer;
+    var locForm: Ѕюджет_—оц—трах.ƒанные.ред«а€вкаЌаЌазначениеѕособи€1;
+    locForm = Self.Create;
+    locForm.ShowEx(лок«апись, Kernel.Window.ModalWindow);
+  end;
+
 -- _ќбработчики событий шаблона. --
 
-proc шаблон_ѕри—оздании(Context: Variant);
-  inherited шаблон_ѕри—оздании(Context);
-  »нициализировать летки√ипер—сылок;
-  «агрузить»конки;
-  »нициализировать»конки‘реймов;
-  ќбновить—писокѕол€(Template.FrameByName['фрейм¬ыплата1'].CellByField['—пособ¬ыплаты'], “ипы—пособов¬ыплаты‘Ћ);
-  ќбновить—писокѕол€(Template.FrameByName['фреймќсновные—ведени€1'].CellByField['“ип»нфо'], “ипы»нфо);
-  ќбновить—писокѕол€(Template.FrameByName['фреймќсновные—ведени€1'].CellByField['ѕричинаѕерерасчета'], “ипыѕричиныѕерерасчета);
-end;
+  inobject private
 
-proc шаблон_ѕри—читывании;
-  inherited шаблон_ѕри—читывании;
-  ѕрочитатьѕозицию–еестра;
-  ¬ид—ќ = Ќазначениеѕособи€.¬ид—траховогоќбеспечени€;
-  if (Self.Record.State = Record.Created):
-    »нтерфейс.Post;
-    »нтерфейс.—оздать—в€занные«аписи;
-  fi;
-  ”становить»нтерфейсы—в€занных«аписей;
-  «аполнить«аголовок«а€вки;
-end;
+  proc шаблон_ѕри—оздании(Context: Variant);
+    inherited шаблон_ѕри—оздании(Context);
+    »нициализировать летки√ипер—сылок;
+    «агрузить»конки;
+    »нициализировать»конки‘реймов;
+    ќбновить—писокѕол€(Template.FrameByName['фрейм¬ыплата1'].CellByField['—пособ¬ыплаты'], “ипы—пособов¬ыплаты‘Ћ);
+    ќбновить—писокѕол€(Template.FrameByName['фреймќсновные—ведени€1'].CellByField['“ип»нфо'], “ипы»нфо);
+    ќбновить—писокѕол€(Template.FrameByName['фреймќсновные—ведени€1'].CellByField['ѕричинаѕерерасчета'], “ипыѕричиныѕерерасчета);
+  end;
 
-func шаблон_ѕри«аписи: logical;
-  Result = true;
-  if (»нт—ведени€ <> nil) :
-    »нт—ведени€.Record.Edit;
-    if (»нт—ведени€.Record.Modified) :
-      »нт—ведени€.Record.Post;
+  proc шаблон_ѕри—читывании;
+    inherited шаблон_ѕри—читывании;
+    ѕрочитатьѕозицию–еестра;
+    ¬ид—ќ = Ќазначениеѕособи€.¬ид—траховогоќбеспечени€;
+    if (Self.Record.State = Record.Created):
+      »нтерфейс.Post;
+      »нтерфейс.—оздать—в€занные«аписи;
     fi;
-  fi;
-end;
+    ”становить»нтерфейсы—в€занных«аписей;
+    «аполнить«аголовок«а€вки;
+  end;
 
-func шаблон_ѕриќтмене : logical;
-  Result = true;
-  if (»нт—ведени€ <> nil) :
-    if (»нт—ведени€.Record.Modified) :
-      »нт—ведени€.Record.Cancel;
+  func шаблон_ѕри«аписи: logical;
+    Result = true;
+    if (»нт—ведени€ <> nil) :
       »нт—ведени€.Record.Edit;
+      if (»нт—ведени€.Record.Modified) :
+        »нт—ведени€.Record.Post;
+      fi;
     fi;
-  fi;
-end;
+  end;
+
+  func шаблон_ѕриќтмене: logical;
+    Result = true;
+    if (»нт—ведени€ <> nil):
+      if (»нт—ведени€.Record.Modified):
+        »нт—ведени€.Record.Cancel;
+        »нт—ведени€.Record.Edit;
+      fi;
+    fi;
+  end;
 
 -- _ќбработчики событий клеток шаблона. --
 
@@ -133,7 +141,7 @@ end;
     end;
   end;
 
--- ќсновные сведени€ --
+  -- ќсновные сведени€ --
 
   func ќсновные—ведени€_ѕри¬ыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
     if (Cell.Contents = '»м€“ипаѕособи€'):
@@ -156,7 +164,7 @@ end;
     fi;
   end;
 
--- —ведени€ о получателе пособи€  --
+  -- —ведени€ о получателе пособи€  --
 
   func ѕолејдрес_ѕриЌажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     ћенюјдреса;
