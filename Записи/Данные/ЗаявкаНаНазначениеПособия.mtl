@@ -12,6 +12,7 @@ record ЗаявкаНаНазначениеПособия inherited ТББ_Базовый.БазовыйДокумент title "За
   field ТипПособия: integer title "";
   field ТипПособияДоп: integer title "";
   field ТипРеестра: integer title "";
+  field ТипФайла: integer title "";
   field СпособВыплаты: integer title "";
   field ТипИнфо: integer title "";
   field ПричинаПерерасчета: integer   title "Причина перерасчета";
@@ -19,6 +20,7 @@ record ЗаявкаНаНазначениеПособия inherited ТББ_Базовый.БазовыйДокумент title "За
   field СчетПолучателя: string title "Номер счета получателя";
   field БИК: string title "БИК";
   field НомерКарты: string title "Номер карты";
+
   --
   field Реестр: Документы.ФСС.Реестр title "Реестр сведений, необходимых для назначения и выплаты пособий";
 
