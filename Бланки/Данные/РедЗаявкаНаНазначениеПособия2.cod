@@ -1,0 +1,157 @@
+
+class inherited “ЅЅ_Ѕазовый.Ѕазовые.ЅазовыйЅланкƒокумент "«а€вка на назначение и оплату пособи€", editor ƒанные.«а€вкаЌаЌазначениеѕособи€;
+--class inherited ƒанные.ред«а€вкаЌаЌазначениеѕособи€1 "редактор за€вки с учетом типа файла", editor ƒанные.«а€вкаЌаЌазначениеѕособи€;
+import classes  онстанты,‘ункцииѕрименени€ остант;--,‘ункцииƒанных;
+import —»—2 classes  онстанты;
+import Ѕазовый classes  онстанты;
+
+--{{ —войства
+inobject public
+
+  var »нтерфейс: ƒанные.инт«а€вкаЌаЌазначениеѕособи€;
+
+inobject private
+
+  -- фреймы
+
+  var фрейм—остав‘ормы :TemplateFrame;
+  var фрейм—одержание :TemplateFrame;
+  var фреймќсновные—ведени€1 :TemplateFrame;
+  var фрейм—ведени€ƒл€‘айла :TemplateFrame;
+  var фреймѕолучатель1 :TemplateFrame;
+  var фреймƒокументыѕолучател€1 :TemplateFrame;
+  var фрейм—ведени€ЅЋ1 :TemplateFrame;
+  var фрейм–асчетЅЋ1 :TemplateFrame;
+  var фрейм¬ыплата1 :TemplateFrame;
+
+  -- иконки
+
+  type typeIcon = (iEdit = 1, iEdit_Disabled, iReport, iMan, iDokMan, iInput, iCalc, iCalc_Disabled, iMoney);
+  var ImageLibr: Image[]; -- локальна€ библиотека изображений
+  type typeSpCell = (cMenuAddr = 1, cMenuIdCard, cMenuCert);
+  var CellLibr: TemplateCell[]; -- локальна€ (дл€ экземпл€ра) библиотека клеток
+
+
+  -- сведени€ о за€вке
+
+  var Ќомер–еестра: string = if(ѕозици€–еестра <> nil, ѕозици€–еестра.–еестр.ЌомерЅум, '');
+  --var Ќомер–еестра: string = if(ѕозици€–еестра <> nil, Str(ѕозици€–еестра.–еестр.Ќомер«аƒень), '');
+  var ¬ид—ќ: Ѕюджет_«ѕиƒƒ.—правочники.¬иды—траховогоќбеспечени€;
+
+  var ѕозици€–еестра: ƒокументы.‘——.ѕозици€–еестра; -- определ€етс€ при считывании
+  var «аголовок«а€вки: string;
+
+  -- интерфейсы св€занных записей
+
+  var »нтјдрес–егистрации :  —правочники.интјдрес—оц—трах;
+  var »нтјдресѕроживани€ :  —правочники.интјдрес—оц—трах;
+  var »нт”достоверениеЋичности :  —правочники.инт”достоверение—оц—трах;
+  var »нтƒокументќѕроживании :  —правочники.инт”достоверение—оц—трах;
+
+  var »нт—ведени€ : variant;
+  var »нт–асчет : variant;
+
+
+--}}
+
+-- _ онструкторы, визуализаторы. --
+
+  inclass public
+
+  func OpenForm (лок«апись: Ѕюджет_—оц—трах.ƒанные.«а€вкаЌаЌазначениеѕособи€): integer;
+    var locForm: Ѕюджет_—оц—трах.ƒанные.ред«а€вкаЌаЌазначениеѕособи€2;
+    locForm = Self.Create;
+    locForm.ShowEx(лок«апись, Kernel.Window.ModalWindow);
+  end;
+
+-- _ќбработчики событий шаблона. --
+
+  inobject private
+
+  proc шаблон_ѕри—оздании(Context: Variant);
+    inherited шаблон_ѕри—оздании(Context);
+    »нициализировать летки√ипер—сылок;
+    «агрузить»конки;
+    --»нициализировать»конки‘реймов;
+    --ќбновить—писокѕол€(Template.FrameByName['фрейм¬ыплата1'].CellByField['—пособ¬ыплаты'], “ипы—пособов¬ыплаты‘Ћ);
+    ќбновить—писокѕол€(Template.FrameByName['фрейм—ведени€ƒл€‘айла'].CellByField['“ип»нфо'], “ипы»нфо);
+    ќбновить—писокѕол€(Template.FrameByName['фрейм—ведени€ƒл€‘айла'].CellByField['ѕричинаѕерерасчета'], “ипыѕричиныѕерерасчета);
+    ќбновить—писокѕол€(Template.FrameByName['фрейм—ведени€ƒл€‘айла'].CellByField[' тоѕодал«а€вление'], “ипыјвторов«а€влений);
+  end;
+
+  proc шаблон_ѕри—читывании;
+    inherited шаблон_ѕри—читывании;
+    ѕрочитатьѕозицию–еестра;
+    ¬ид—ќ = Ќазначениеѕособи€.¬ид—траховогоќбеспечени€;
+    if (Self.Record.State = Record.Created):
+      »нтерфейс.Post;
+      »нтерфейс.—оздать—в€занные«аписи;
+    fi;
+    ”становить»нтерфейсы—в€занных«аписей;
+    «аполнить«аголовок«а€вки;
+  end;
+
+
+  -- ”правление изображени€ми --
+
+  proc »нициализировать летки√ипер—сылок;
+    var locSection: TemplateSection;
+    locSection = SectionByName('секцѕолучатель1');
+    CellLibr[cMenuAddr] = SectionCellByContents(locSection, 'ћеню');
+    locSection = SectionByName('секцƒокѕолучател€1');
+    CellLibr[cMenuIdCard] = SectionCellByContents(locSection, 'ћеню');
+    locSection = SectionByName('секцƒокѕолучател€2');
+    CellLibr[cMenuCert] = SectionCellByContents(locSection, 'ћеню');
+  end;
+
+  proc «агрузить»конки;
+    ImageLibr[iEdit] = Image.Create;
+    ImageLibr[iEdit].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\32\Edit.ico');
+    ImageLibr[iEdit_Disabled] = Image.Create;
+    ImageLibr[iEdit_Disabled].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\32\EditDisabled.ico');
+    ImageLibr[iReport] = Image.Create;
+    ImageLibr[iReport].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\32\information.ico');
+    ImageLibr[iMan] = Image.Create;
+    ImageLibr[iMan].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\Ѕизнесмен.ico');
+    ImageLibr[iDokMan] = Image.Create;
+    ImageLibr[iDokMan].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\ ниги.ico');
+    ImageLibr[iInput] = Image.Create;
+    ImageLibr[iInput].LoadFromFile('%Projects%\“ЅЅ_Ѕазовый\ѕриложени€\»конки\—правка.ico');
+    ImageLibr[iCalc] = Image.Create;
+    ImageLibr[iCalc].LoadFromFile('%Projects%\Ѕюджет_«ѕиƒƒ\ѕриложени€\»конки\32\calc.ico');
+    ImageLibr[iCalc_Disabled] = Image.Create;
+    ImageLibr[iCalc_Disabled].LoadFromFile('%Projects%\Ѕюджет_«ѕиƒƒ\ѕриложени€\»конки\32\calc_disabled.ico');
+    ImageLibr[iMoney] = Image.Create;
+    ImageLibr[iMoney].LoadFromFile('%Projects%\Ѕюджет_«ѕиƒƒ\ѕриложени€\»конки\¬ыплаты.ico');
+  end;
+
+-- _¬спомогательные методы. --
+
+  proc ѕрочитатьѕозицию–еестра;
+    ѕозици€–еестра = »нтерфейс.Ќайтиѕозицию–еестра;
+  end;
+
+  proc ”становить»нтерфейсы—в€занных«аписей;
+    »нтјдрес–егистрации = —правочники.интјдрес—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,тапѕрописка);
+    »нтјдресѕроживани€ = —правочники.интјдрес—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,тап‘актический);
+    »нт”достоверениеЋичности = —правочники.инт”достоверение—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,“ипƒокѕолуч”дЋичности);
+    »нтƒокументќѕроживании = —правочники.инт”достоверение—оц—трах.ќткрытьѕо«а€вке»“ипу(Self.Record,“ипƒокѕолучѕроживание);
+    »нт—ведени€ = nil;
+    »нт–асчет = nil;
+    if (Self.Record.“ип–еестра = “ип–еестраЌѕ_ЅЋ) :
+      »нт—ведени€ = ƒанные.инт—ведени€–еестраЅЋ.ќткрытьѕо«а€вке(Self.Record);
+      »нт–асчет = ƒанные.инт–асчет–еестраЅЋ.ќткрытьѕо«а€вке(Self.Record);
+    fi;
+  end;
+
+  proc «аполнить«аголовок«а€вки;
+    «аголовок«а€вки = '«а€вка є '+ if(ЌомерЅум <> nil, ЌомерЅум, 'б/н');
+    if (ѕозици€–еестра <> nil) :
+      «аголовок«а€вки = «аголовок«а€вки + ', включена в реестр є ' + if(ѕозици€–еестра.–еестр.–егЌомер‘—— <> nil, ѕозици€–еестра.–еестр.–егЌомер‘——, 'б/н') + '.';
+    else
+      «аголовок«а€вки = «аголовок«а€вки + '.';
+    fi;
+  end;
+
+
+end

@@ -2,3 +2,8 @@
 <Properties Version="1">
   <Property Name="Title" Value="Данные для переписки с ТО ФСС "/>
 </Properties>
+<Items>
+  <Item Name="РасчетРеестраБЛ"/>
+  <Item Name="СведенияРеестраБЛ"/>
+  <Item Name="ЗаявкаНаНазначениеПособия"/>
+</Items>
